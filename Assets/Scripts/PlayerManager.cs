@@ -14,12 +14,14 @@ public class PlayerManager : Singleton<PlayerManager>
     public static int CLUB_INDEX = 0;
     public static int GRENADE_INDEX = 1;
     public static int ROCKET_INDEX = 2;
+    public static int PISTOL_INDEX = 3;
     private int _currentWeaponIndex = 0;
-    private Weapon[] _weapons = new Weapon[3];
+    private Weapon[] _weapons = new Weapon[4];
     // string[] Ar = new string[10];
     private GameObject _clubGO;
     private GameObject _grenadeGunGO;
     private GameObject _rocketLauncherGO;
+    private GameObject _pistolGO;
     
     
     // private GameObject _player;
@@ -32,11 +34,15 @@ public class PlayerManager : Singleton<PlayerManager>
         _clubGO = GameObject.Find("Main Camera/ClubHolder/Club");
         _grenadeGunGO = GameObject.Find("Main Camera/Gun");
         _rocketLauncherGO = GameObject.Find("Main Camera/RocketLauncher");
+        _pistolGO = GameObject.Find("Main Camera/Pistol");
         _clubGO.SetActive(false);
         _grenadeGunGO.SetActive(false);
         _rocketLauncherGO.SetActive(false);
+        _pistolGO.SetActive(false);
         CurrentWeapon = null;
         InitWeapons();
+        
+        // AddWeaponByName("Pistol");
     }
 
 
@@ -46,6 +52,7 @@ public class PlayerManager : Singleton<PlayerManager>
         _weapons[CLUB_INDEX] = new Weapon("Club", _clubGO, CLUB_INDEX, int.MaxValue, int.MaxValue, "Images/Club_sprite");
         _weapons[GRENADE_INDEX] = new Weapon("Grenade Thrower", _grenadeGunGO, GRENADE_INDEX, 50, 100, "Images/GrenadeGun_sprite");
         _weapons[ROCKET_INDEX] = new Weapon("Rocket Launcher", _rocketLauncherGO, ROCKET_INDEX, 20, 50, "Images/Rocket_sprite");
+        _weapons[PISTOL_INDEX] = new Weapon("Pistol", _pistolGO, PISTOL_INDEX, 50, 50, "Images/Pistol_sprite");
         foreach(Weapon weapon in _weapons){
             weapon.Equipped = false;
         }        
@@ -80,7 +87,7 @@ public class PlayerManager : Singleton<PlayerManager>
     //     if (e.isKey)
     //     {
     //         if(e.type == EventType.KeyUp){
-    //             Debug.Log("KeyUp:: "+e.keyCode);
+    //             m.Log("KeyUp:: "+e.keyCode);
     //             if(e.keyCode == 'C'){
     //                 WeaponIndex ++;
     //             }
@@ -95,12 +102,12 @@ public class PlayerManager : Singleton<PlayerManager>
         }
         return null;
     }
-    public void AddWeaponByName( string weaponName ){
+    public bool AddWeaponByName( string weaponName ){
 
-        AddWeaponByIndex( GetWeaponByName(weaponName).Index );
+        return AddWeaponByIndex( GetWeaponByName(weaponName).Index );
     }
-    public void AddWeaponByIndex( int weaponInex ){
-        
+    public bool AddWeaponByIndex( int weaponInex ){
+        // return true if we were able to equip weapon or add ammo
         Weapon weapon = _weapons[weaponInex];
         // Check if Player already has this weapon
 
@@ -124,6 +131,7 @@ public class PlayerManager : Singleton<PlayerManager>
                     use = "throw";
                     break;
                 case 2:
+                case 3:
                     use = "fire";
                     break;
                 default:
@@ -140,11 +148,10 @@ public class PlayerManager : Singleton<PlayerManager>
                 GameManager.Instance.ShowMessage("You Got the "+weapon.Name+"!");
                 GameManager.Instance.ShowMessage("'C' to change weapons,\n\r'G' or Left Mouse Btn to "+use+".");
             }
-                
+            return true;
         } else {
-            // Weapon already exists. Add ammo for that weapon
-
-            weapon.AddAmmo(10);
+            // Weapon already equipped. Add ammo for that weapon
+            return weapon.AddAmmo(10);
         }
     }
 

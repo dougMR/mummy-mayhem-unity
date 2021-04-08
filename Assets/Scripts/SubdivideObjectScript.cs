@@ -53,8 +53,6 @@ public class SubdivideObjectScript : MonoBehaviour
                             Renderer m_Renderer = subdivision.GetComponent<Renderer>();
                             m_Renderer.material.color = _myColor;
                         }
-                        //  Debug.Log("subdivisionSize " + subdivisionSize);
-                        // subdivision.transform.localScale = new Vector3(0.23f, 0.23f, 0.23f);
                         subdivision.transform.localScale = subdivisionSize;
                         subdivisionsList.Add(subdivision);
                         // Debug.Log("subdivision.parent ==> "+subdivision.transform.root);

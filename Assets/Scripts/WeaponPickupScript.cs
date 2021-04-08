@@ -18,18 +18,19 @@ public class WeaponPickupScript : MonoBehaviour
     {
         if (other.name == "Player")
         {
-            // Pick Up Weapon
-            _pickupSound.Play();
-            PlayerManager.Instance.AddWeaponByName(weaponName);
-
-            Destroy(gameObject, 1f);
-            // 1.0f delay and all below, just so audio can play before object is destroyed.
-            MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>(false);
-            foreach(MeshRenderer mesh in meshes ){
-                mesh.enabled = false;
+            if (  PlayerManager.Instance.AddWeaponByName(weaponName) ){
+                // Pick Up Weapon
+                _pickupSound.Play();
+                // Destroy pickup
+                Destroy(gameObject, 1f);
+                // 1.0f delay and all below, just so audio can play before object is destroyed.
+                MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>(false);
+                foreach(MeshRenderer mesh in meshes ){
+                    mesh.enabled = false;
+                }
+                GetComponent<CapsuleCollider>().enabled = false;
+                GetComponent<ParticleSystem>().Stop();
             }
-            GetComponent<CapsuleCollider>().enabled = false;
-            GetComponent<ParticleSystem>().Stop();
         }
     }
 }

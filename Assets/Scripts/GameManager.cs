@@ -291,9 +291,9 @@ public class GameManager : Singleton<GameManager>
                 {
                     if(hit.collider != null){
                         Debug.Log("GameManager.Explode Hit...");
-                        Debug.Log("hit ==> "+hit);
+                        Debug.Log("GameManager.Explode hit ==> "+hit);
                         // Debug.Log("hit.rigidbody ==> "+hit.rigidbody);
-                        Debug.Log("hit.transform.name ==> "+hit.transform.name);
+                        Debug.Log("GameManager.Explode hit.transform.name ==> "+hit.transform.name);
                         // Debug.Log("rb ==> "+rb);
                         // Debug.Log("rb.transform ==> "+rb.transform);
                         // Debug.Log("_player.transform ==> "+_player.transform);
@@ -308,7 +308,7 @@ public class GameManager : Singleton<GameManager>
                     }
                 }
                 if( exposed ) {
-
+                    Debug.Log("GM Explode exposed = true");
                     if ( rb.CompareTag("Mummy") && !rb.name.Contains("Separated"))
                     {
                         // Apply Damage 
@@ -316,7 +316,7 @@ public class GameManager : Singleton<GameManager>
                         float damagef = explosionForce / 10f;
                         damagef *= (radius-dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
-                        // Debug.Log("GameManager damage to apply ==> "+damage);
+                        Debug.Log("GameManager Explode Mummy, damage to apply ==> "+damage);
                         // GameObject[] debris = 
                         // if (damage > 0)
                         rb.GetComponent<EnemyAIScript>().ApplyDamage( damage );
@@ -400,10 +400,13 @@ public class GameManager : Singleton<GameManager>
         }
 
         // show explosion
-        GameObject expl = (GameObject)Instantiate(explosionGO, explosionPos, Quaternion.identity);
+        if(explosionGO != null){
+            GameObject expl = (GameObject)Instantiate(explosionGO, explosionPos, Quaternion.identity);
 
-        Destroy(expl, 3); // delete the explosion after 3 seconds
-        // Debug.Log("expl: " + expl);
+            Destroy(expl, 3); // delete the explosion after 3 seconds
+            // Debug.Log("expl: " + expl);
+        }
+        
     }
 
     void SetPaused(bool value )
@@ -420,6 +423,21 @@ public class GameManager : Singleton<GameManager>
         AudioListener.pause = value;
         pausedScreen.gameObject.SetActive(value);
     }
+
+    public GameObject FindChildByName( GameObject parent, string name)
+    {
+        Transform[] trs= parent.GetComponentsInChildren<Transform>(true);
+        foreach(Transform t in trs){
+            if(t.name == name){
+                return t.gameObject;
+            }
+        }
+        return null;
+    }
+
+    /*
+    GETTERS / SETTERS
+    */
     public bool GamePaused
     {
         get { return _gameIsPaused; }

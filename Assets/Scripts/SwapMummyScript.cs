@@ -36,8 +36,9 @@ public class SwapMummyScript : MonoBehaviour
     public GameObject Swap()
     {
         
-        // Debug.Log("Swap() "+gameObject.name);
+        Debug.Log("Swap() "+gameObject.name);
         if(gameObject.GetComponent<Collider>().enabled == false){
+            Debug.Log("Swap collider.enabled ==> "+gameObject.GetComponent<Collider>().enabled);
             return null;
         }
         gameObject.GetComponent<MummyGroanScript>().StopGroan();

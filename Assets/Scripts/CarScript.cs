@@ -25,7 +25,7 @@ public class CarScript : MonoBehaviour
         _engineSound = gameObject.AddComponent<AudioSource>();
         _engineSound.clip = engineClip;
         _engineSound.loop = true;
-        _engineSound.volume = 0.4f;
+        _engineSound.volume = 0.6f;
         _klunk = gameObject.AddComponent<AudioSource>();
         _klunk.clip = klunkClip;
         _brakes = gameObject.AddComponent<AudioSource>();

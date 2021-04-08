@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SlidingDoorScript : MonoBehaviour
 {
-    public GameObject ignoreGO;
+    public GameObject ignoreGO = null;
     // public bool useCollide = false;
     // public bool useTrigger = false;
     public bool openOnly = false;
@@ -48,10 +48,14 @@ public class SlidingDoorScript : MonoBehaviour
         // Debug.Log("other.name:: "+other.name);
         // Debug.Log("PlayerOnly:: "+playerOnly);
         // Debug.Log("_isOpen:: "+_isOpen);
-        if ( !remoteTrigger && ((playerOnly && other.name == "Player") || !playerOnly && other.gameObject != ignoreGO))
+        bool openIt = false;
+
+        if ( !remoteTrigger && (
+            (playerOnly && other.name == "Player") || 
+            (!playerOnly && ignoreGO != null && other.gameObject != ignoreGO) ))
         {
             Debug.Log("SlidingDoor[ "+gameObject.name+" ] TriggerEnter other.name ==> "+other.name);
-            Debug.Log("VS ignoreGO.name ==> "+ignoreGO.name);
+            // Debug.Log("VS ignoreGO.name ==> "+ignoreGO.name);
             if (!_isOpen)
             {
                 Open();

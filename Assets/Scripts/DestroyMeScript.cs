@@ -8,16 +8,30 @@ After set time, % chance of Destroy
 
 public class DestroyMeScript : MonoBehaviour
 {
+    public float delay = 0.0f;
+
+    private float _minShortLife = 1.0f;
+    private float _maxShortLife = 10.0f;
+    private float _minLongLife = 5.0f;
+    private float _maxLongLife = 30.0f;
+    private float _lifetime;
+
     // Start is called before the first frame update
     void Start()
     {
-        if (Random.Range(0, 4) == 0)
+        if(delay > 0f)
         {
-            float lifetime = Random.Range(30.0f, 60.0f);
-            Destroy(gameObject, lifetime);
-        } else {
-            float lifetime = Random.Range(5f, 20.0f);
-            Destroy(gameObject, lifetime);
+            _lifetime = delay;
+        
+        }else{
+            // For Mummy Debris
+            if (Random.Range(0, 4) == 0)
+            {
+                _lifetime = Random.Range(_minLongLife, _maxLongLife);
+            } else {
+                _lifetime = Random.Range(_minShortLife, _maxShortLife);
+            }
         }
+        Destroy(gameObject, _lifetime);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,12 +8,16 @@ public class FireWeaponScript : MonoBehaviour
 {
     public GameObject grenadePrefab;
     public GameObject rocketPrefab;
+    public GameObject bulletImpactPrefab;
     public AudioClip gunClip;
     public AudioClip emptyClip;
     public AudioClip ammoFullClip;
+    public AudioClip pistolClip;
     // public Image ammoBar;
     public Image grenadeReloadImage;
     public Image rpgReloadImage;
+    public Image pistolReloadImage;
+    public AudioClip pistolReloadClip;
     public AudioClip grenadeReloadClip;
     public AudioClip clubWhooshClip;
     public AudioClip rpgReloadClip;
@@ -23,6 +27,8 @@ public class FireWeaponScript : MonoBehaviour
     private AudioSource gunSound;
     private AudioSource emptySound;
     private AudioSource ammoFullSound;
+    private AudioSource _pistolSound;
+    private AudioSource _pistolReloadSound;
     // private int maxAmmo = 100;
     // private int currentAmmo;
     private Coroutine reloadCo;
@@ -32,7 +38,9 @@ public class FireWeaponScript : MonoBehaviour
     private AudioSource _clubWhooshSound;
     private float _lastSwingTime = 0f;
     // private GameObject _gun;
-
+    private ParticleSystem _muzzleFlash;
+    private GameObject _pistol;
+    private GameObject _pistolCrosshair;
 
     void Start()
     {
@@ -64,15 +72,34 @@ public class FireWeaponScript : MonoBehaviour
             ammoFullSound.clip = ammoFullClip;
             ammoFullSound.volume = 0.5f;
         }
+        if (pistolClip != null)
+        {
+            _pistolSound = gameObject.AddComponent<AudioSource>();
+            _pistolSound.clip = pistolClip;
+            // pistolSound.volume = 0.5f;
+        }
+        // v Locating muzzleFlash should live in an init function (Start, Awake, etc)
+        // _muzzleFlash = GameObject.Find("Main Camera/Pistol/MuzzleFlash").GetComponent<ParticleSystem>();
+        GameObject myCamera = GameObject.Find("Main Camera");
+        _pistol = GameManager.Instance.FindChildByName(myCamera, "Pistol");
+        _pistolCrosshair = GameManager.Instance.FindChildByName(myCamera, "CrosshairCanvas");
+        Debug.Log("_pistol:: "+_pistol.name);
+        _muzzleFlash = GameManager.Instance.FindChildByName(myCamera, "MuzzleFlash").GetComponent<ParticleSystem>();
         // currentAmmo = maxAmmo;
         Color c = grenadeReloadImage.color;
         c.a = 0;
         grenadeReloadImage.color = c;
         rpgReloadImage.color = c;
+        pistolReloadImage.color = c;
         if (grenadeReloadClip != null)
         {
             _grenadeReloadSound = gameObject.AddComponent<AudioSource>();
             _grenadeReloadSound.clip = grenadeReloadClip;
+        }
+        if (pistolReloadClip != null)
+        {
+            _pistolReloadSound = gameObject.AddComponent<AudioSource>();
+            _pistolReloadSound.clip = pistolReloadClip;
         }
         if (rpgReloadClip != null)
         {
@@ -87,6 +114,53 @@ public class FireWeaponScript : MonoBehaviour
     //     ammoBar.fillAmount = ratio;
     // }
 
+    void FirePistol() 
+    {
+        Debug.Log("FireWeaponScript.FirePistol()");
+        Transform cameraTransform = Camera.main.transform;
+        Vector3 pistolPos = cameraTransform.position; //_pistol.transform.position;
+        Vector3 shotDirection = cameraTransform.forward;
+        
+        
+        if (_pistolSound != null)
+            _pistolSound.PlayOneShot(pistolClip, 1f);
+        // 1. muzzle flash
+        _muzzleFlash.Play();
+
+        //   1b. hide crosshair
+        _pistolCrosshair.SetActive(false);
+        GameManager.Instance.DelayFunction( ()=>{
+            _pistolCrosshair.SetActive(true);
+        }, 1f );
+        
+        // 2. cast forward-facing ray
+        RaycastHit hit;
+        if (Physics.Raycast(pistolPos, shotDirection, out hit, Mathf.Infinity))
+        {
+            Debug.DrawRay(pistolPos, shotDirection * hit.distance, Color.yellow, 10);
+            // Debug.Log("Did Hit :: "+hit.collider.name+" , dist:: "+hit.distance);
+            // Quaternion quatRot = Quaternion.Inverse(cameraTransform.rotation);
+            // Quaternion quatRot = Quaternion.Euler(-cameraTransform.rotation.eulerAngles);
+            GameObject bulletImpact = Instantiate(bulletImpactPrefab, hit.point, cameraTransform.rotation) as GameObject;
+
+            GameManager.Instance.Explode( hit.point, 0.1f, 64f, null, "Enemies");
+            if( hit.rigidbody != null )
+            {
+                hit.rigidbody.AddForceAtPosition( shotDirection*100, hit.point );
+            }
+            
+        }
+        //   2b. get distance of ray hit
+        //   2c. calculate time for bullet to travel that distance
+        //   2d. wait that duration
+        //   2e. cast same ray, get ray hit
+        //   2f. spawn bullet impact at that point
+        //     2f1. impact smoke puff particle emitter
+        //     2f2. tiny explosion at that point
+        // 
+
+    }
+
     void FireRocket()
     {
         Vector3 playerPos = Camera.main.transform.position;
@@ -96,7 +170,6 @@ public class FireWeaponScript : MonoBehaviour
         Quaternion playerRotation = transform.rotation;
         float cameraXrot = Camera.main.transform.eulerAngles.x;
         Quaternion cameraRotation = Camera.main.transform.rotation;
-        // Vector3 launchDir = Quaternion.Euler(-1 * cameraXrot, 0, 0) * playerDirection;
 
         Vector3 launchDir = Quaternion.AngleAxis(cameraXrot, transform.right) * playerDirection;
 
@@ -190,6 +263,8 @@ public class FireWeaponScript : MonoBehaviour
             else if (weaponName == "Club"){
                 SwingClub();
                 _commotionScript.CauseCommotion(5f, 3f);
+            } else if (weaponName == "Pistol"){
+                FirePistol();
             } else if (weaponName == "None") {
                 GameManager.Instance.ShowMessage("You Need a Weapon.", 0.1f);
             } else if (weaponName == "Empty"){
@@ -210,7 +285,7 @@ public class FireWeaponScript : MonoBehaviour
             if(PlayerManager.Instance.GetWeaponByName(weaponType).Equipped){
                 GameManager.Instance.ShowMessage(weaponType + " is full.");
             } else {
-                // Player doesn't have this weapon yet
+                // Player doesn't have this weapon equipped
                 GameManager.Instance.ShowMessage("You're carrying max \n\r"+weaponType + " ammo.");
             }
             
@@ -230,6 +305,10 @@ public class FireWeaponScript : MonoBehaviour
             case "Grenade Thrower":
                 reloadSound = _grenadeReloadSound;
                 reloadImage = grenadeReloadImage;
+                break;
+            case "Pistol":
+                reloadSound = _pistolReloadSound;
+                reloadImage = pistolReloadImage;
                 break;
             default:
                 reloadSound = _clubWhooshSound;

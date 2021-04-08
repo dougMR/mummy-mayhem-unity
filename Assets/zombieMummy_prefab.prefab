@@ -695,6 +695,7 @@ GameObject:
   - component: {fileID: -2747922351386657635}
   - component: {fileID: 3360403950527076213}
   - component: {fileID: -672731056731336114}
+  - component: {fileID: 3173594449819636952}
   - component: {fileID: 4324622598545074609}
   m_Layer: 10
   m_Name: zombieMummy_prefab
@@ -905,6 +906,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!65 &3173594449819636952
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3416855026350578639}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 3, z: 1}
+  m_Center: {x: 0, y: 0.6, z: 0.25}
 --- !u!136 &4324622598545074609
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -914,11 +928,11 @@ CapsuleCollider:
   m_GameObject: {fileID: 3416855026350578639}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 1
   m_Height: 3
   m_Direction: 1
-  m_Center: {x: 0, y: 0.5, z: 0.25}
+  m_Center: {x: 0, y: 0.6, z: 0.25}
 --- !u!1 &3512402607506636166
 GameObject:
   m_ObjectHideFlags: 0
@@ -1157,7 +1171,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4197200250011294534}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.029999997, y: 0, z: -0.051}
+  m_LocalPosition: {x: -0.029999997, y: 1.5, z: -0.051}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 2603303955468517749}

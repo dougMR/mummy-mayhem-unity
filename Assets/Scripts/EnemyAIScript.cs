@@ -190,9 +190,9 @@ public class EnemyAIScript : MonoBehaviour
     }
 
     public void Die(){
-        // Debug.Log("EnemyAI.Die()");
+        Debug.Log("EnemyAI.Die()");
         GameObject swappedMummy = gameObject.GetComponent<SwapMummyScript>().Swap();
-                 
+        Debug.Log("EnemyAI.Die swappedMummy ==> "+swappedMummy.name);
         Rigidbody[] RBs = swappedMummy.GetComponentsInChildren<Rigidbody>();
         // List<GameObject> listOfGOs = new List<GameObject>();
         foreach ( Rigidbody rb in RBs ){

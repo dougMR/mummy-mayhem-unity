@@ -44,7 +44,7 @@ public class GrenadeCollideScript : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         
-        // Debug.Log("Grenade collided.");
+        Debug.Log("Grenade collided.");
         GameObject other = collision.gameObject;
         
         if (!other.CompareTag("Player"))
