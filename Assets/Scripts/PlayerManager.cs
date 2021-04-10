@@ -1,6 +1,13 @@
-﻿/*
-PlayerManager should be reconceived.
-It is currently more of a player's weapons manager
+/*
+
+This script is a Player's weapons manager.  It should be renamed. Replace any call to PlayerManager.Instance... with the new class name.Instance
+
+Weapon class is included below.
+
+This script is tangled with FireWeaponScript.cs
+
+They should be combined.
+
 */
 
 using System.Collections;
@@ -15,22 +22,36 @@ public class PlayerManager : Singleton<PlayerManager>
     public static int GRENADE_INDEX = 1;
     public static int ROCKET_INDEX = 2;
     public static int PISTOL_INDEX = 3;
+
+    public AudioClip clubWhooshClip; // <- redundant with FireWeaponScript.cs
+    private AudioSource _clubWhooshSound; // <- redundant with FireWeaponScript.cs
+
+    public Image grenadeReloadImage;
+    public Image rpgReloadImage;
+    public Image pistolReloadImage;
+    public AudioClip pistolReloadClip;
+    public AudioClip grenadeReloadClip;
+    public AudioClip rpgReloadClip;
+    private AudioSource _rpgReloadSound;
+    private AudioSource _pistolReloadSound;
+    private Coroutine reloadCo;
+    private AudioSource _grenadeReloadSound;
+
+    public AudioClip ammoFullClip;
+    private AudioSource _ammoFullSound;
+
     private int _currentWeaponIndex = 0;
     private Weapon[] _weapons = new Weapon[4];
-    // string[] Ar = new string[10];
     private GameObject _clubGO;
     private GameObject _grenadeGunGO;
     private GameObject _rocketLauncherGO;
     private GameObject _pistolGO;
     
     
-    // private GameObject _player;
     // Start is called before the first frame update
     protected override void Awake()
     {
         base.Awake();
-        // Init();
-        // _player = GameObject.Find("Player");
         _clubGO = GameObject.Find("Main Camera/ClubHolder/Club");
         _grenadeGunGO = GameObject.Find("Main Camera/Gun");
         _rocketLauncherGO = GameObject.Find("Main Camera/RocketLauncher");
@@ -42,7 +63,43 @@ public class PlayerManager : Singleton<PlayerManager>
         CurrentWeapon = null;
         InitWeapons();
         
-        // AddWeaponByName("Pistol");
+    }
+
+    void Start()
+    {
+        Color c = grenadeReloadImage.color;
+        c.a = 0;
+        grenadeReloadImage.color = c;
+        rpgReloadImage.color = c;
+        pistolReloadImage.color = c;
+        
+        if (clubWhooshClip != null)
+        {
+            _clubWhooshSound = gameObject.AddComponent<AudioSource>();
+            _clubWhooshSound.clip = clubWhooshClip;
+        }
+
+        if (grenadeReloadClip != null)
+        {
+            _grenadeReloadSound = gameObject.AddComponent<AudioSource>();
+            _grenadeReloadSound.clip = grenadeReloadClip;
+        }
+        if (pistolReloadClip != null)
+        {
+            _pistolReloadSound = gameObject.AddComponent<AudioSource>();
+            _pistolReloadSound.clip = pistolReloadClip;
+        }
+        if (rpgReloadClip != null)
+        {
+            _rpgReloadSound = gameObject.AddComponent<AudioSource>();
+            _rpgReloadSound.clip = rpgReloadClip;
+        }
+        if (ammoFullClip != null)
+        {
+            _ammoFullSound = gameObject.AddComponent<AudioSource>();
+            _ammoFullSound.clip = ammoFullClip;
+            _ammoFullSound.volume = 0.5f;
+        }
     }
 
 
@@ -94,6 +151,7 @@ public class PlayerManager : Singleton<PlayerManager>
     //         }
     //     }
     // }
+
     public Weapon GetWeaponByName( string weaponName) {
         foreach( Weapon weapon in _weapons){
             if(weapon.Name == weaponName){
@@ -128,7 +186,7 @@ public class PlayerManager : Singleton<PlayerManager>
                     use = "swing";
                     break;
                 case 1:
-                    use = "throw";
+                    use = "launch";
                     break;
                 case 2:
                 case 3:
@@ -154,6 +212,67 @@ public class PlayerManager : Singleton<PlayerManager>
             return weapon.AddAmmo(10);
         }
     }
+
+    public void PlayAmmoFullSound(){
+        if(_ammoFullSound) _ammoFullSound.Play();
+    }
+
+    public bool ReloadWeapon(string weaponType, int amount = 5 )
+    {
+        if(weaponType == "") weaponType = PlayerManager.Instance.CurrentWeapon.Name;
+        bool addedAmmo = PlayerManager.Instance.GetWeaponByName(weaponType).AddAmmo(amount);
+        if( !addedAmmo ) {
+            return false;
+        }
+        Image reloadImage;
+        AudioSource reloadSound;
+        switch(weaponType) {
+        
+            case "Rocket Launcher":
+                reloadSound = _rpgReloadSound;
+                reloadImage = rpgReloadImage;
+                break;
+            case "Grenade Thrower":
+                reloadSound = _grenadeReloadSound;
+                reloadImage = grenadeReloadImage;
+                break;
+            case "Pistol":
+                reloadSound = _pistolReloadSound;
+                reloadImage = pistolReloadImage;
+                break;
+            default:
+                reloadSound = _clubWhooshSound;
+                reloadImage = grenadeReloadImage;
+                break;
+            
+        }
+        reloadSound.Play();
+        if (reloadCo != null)
+            StopCoroutine(reloadCo);
+        reloadCo = StartCoroutine(FlashImage(reloadImage));
+        return true;
+    }
+    IEnumerator FlashImage(Image whichImage)
+    {
+        // Debug.Log(" ----- CoRoutine START!!");
+        whichImage.gameObject.SetActive(true);
+        whichImage.color = Color.white;
+        for (float ft = 1f; ft >= 0; ft -= 0.1f)
+        {
+            // Debug.Log("FlashDamageImage(" + ft + ")");
+            Color c = whichImage.color;
+            if (ft < 0.1f)
+                ft = 0;
+
+            c.a = ft;
+            whichImage.color = c;
+            yield return new WaitForSeconds(.1f); ;
+        }
+        // Debug.Log(" ----- CoRoutine OVER!!");
+        whichImage.gameObject.SetActive(false);
+    }
+
+    //  GETTERS / SETTERS
 
     public Weapon CurrentWeapon {
         get {
@@ -181,14 +300,21 @@ public class PlayerManager : Singleton<PlayerManager>
         private set 
         {
             // Set Weapon by index
-            // if ( value is int){
-                value = value % _weapons.Length;
-                _currentWeaponIndex = value;
-                CurrentWeapon = _weapons[value];
-            // }
+            value = value % _weapons.Length;
+            _currentWeaponIndex = value;
+            CurrentWeapon = _weapons[value];
         }
     }
+
 }
+
+
+
+/*
+
+    WEAPON CLASS
+
+*/
 
 public class Weapon
 {
@@ -214,21 +340,45 @@ public class Weapon
         MySprite = Resources.Load <Sprite>(spritePath);
     }
 
-    public bool AddAmmo( int amt ){
+    public bool AddAmmo( int amt ){ 
+        // !!! Needs Refactoring !!!
+        // Debug.Log("Weapon("+Name+") AddAmmo("+amt+")");
+        bool success = false;
         if((amt > 0 && _ammoCount < _maxAmmo) || (amt < 0 && _ammoCount + amt >= 0)){
             Ammo+= amt;
-            amt = Mathf.Clamp(amt, 0, _maxAmmo);
-            UpdateAmmoBar();
-            return true;
+            success = true;
+        } else if( amt <= 0 ) {
+            if( _ammoCount > 0 ) {
+                Ammo += amt;
+                success = true;
+            } else {
+                GameManager.Instance.ShowMessage(Name + " is empty.");
+                success = false;
+            }
+        } else {
+            if(PlayerManager.Instance.GetWeaponByName(Name).Equipped){
+                GameManager.Instance.ShowMessage(Name + " is full.");
+            } else {
+                // Player doesn't have this weapon equipped
+                GameManager.Instance.ShowMessage("You're carrying max \n\r"+Name + " ammo.");
+            }
+            
+            PlayerManager.Instance.PlayAmmoFullSound();
+            success = false;
         }
         UpdateAmmoBar();
-        return false;
+        return success;
+
     }
 
     private void UpdateAmmoBar()
     {
-        float ratio = (float)Ammo / (float)MaxAmmo;
-        _ammoBar.fillAmount = ratio;
+        if(PlayerManager.Instance.CurrentWeapon == this){
+            Debug.Log(PlayerManager.Instance.CurrentWeapon.Name + " == " + this.Name);
+            float ratio = (float)Ammo / (float)MaxAmmo;
+            _ammoBar.fillAmount = ratio;
+        }
+        
     }
 
     public Sprite MySprite
@@ -245,9 +395,7 @@ public class Weapon
     {
         get => _ammoCount;
         private set {
-            // if ( value is int ){
-                _ammoCount = value;
-            // }
+            _ammoCount = Mathf.Clamp(value, 0, _maxAmmo);
         }
     }
     public int MaxAmmo
@@ -272,9 +420,7 @@ public class Weapon
         get => _index;
         private set 
         {
-            // if(value is int){
-                _index = value;
-            // }
+            _index = value;
         }
     }
     public bool Active
@@ -283,9 +429,7 @@ public class Weapon
         get => _myGO.activeSelf;
         set 
         {
-            // if (value is bool) {
-                _myGO.SetActive(value);
-            // }
+            _myGO.SetActive(value);
         }
     }
     public bool Equipped
@@ -294,9 +438,7 @@ public class Weapon
         get => _equipped;
         set 
         {
-            // if (value is bool) {
-                _equipped = value;
-            // }
+            _equipped = value;
         }
     }
 }

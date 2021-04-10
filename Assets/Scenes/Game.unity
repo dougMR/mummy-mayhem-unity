@@ -39054,7 +39054,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numAmmo: 10
-  ammoType: Grenade Thrower
+  weaponType: Grenade Thrower
 --- !u!4 &566923863 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1953193006964872268, guid: c4e225d89227c43349f851282df0683d, type: 3}
@@ -45867,7 +45867,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.2206746, g: 0.5125565, b: 0.8207547, a: 1}
+      maxColor: {r: 1, g: 0.44401285, b: 0.4009434, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -52996,15 +52996,8 @@ MonoBehaviour:
   bulletImpactPrefab: {fileID: 6878158546063907351, guid: 234d2e7ccfd8646e5b0627caf56b27dc, type: 3}
   gunClip: {fileID: 8300000, guid: da9f26801273b494a9d51354b481d6d9, type: 3}
   emptyClip: {fileID: 8300000, guid: 10c456c74d4364bcc8755912fdc4e772, type: 3}
-  ammoFullClip: {fileID: 8300000, guid: 739b1b464aa414628852d7608d1bf859, type: 3}
   pistolClip: {fileID: 8300000, guid: 879594f3031734f4488e17cf4a61932f, type: 3}
-  grenadeReloadImage: {fileID: 682173304}
-  rpgReloadImage: {fileID: 478749508}
-  pistolReloadImage: {fileID: 376492051}
-  pistolReloadClip: {fileID: 8300000, guid: 2c29f0894a6be4a9f92aad148631008c, type: 3}
-  grenadeReloadClip: {fileID: 8300000, guid: 2c29f0894a6be4a9f92aad148631008c, type: 3}
   clubWhooshClip: {fileID: 8300000, guid: 45169d6c0e3b241c580b245fd4246600, type: 3}
-  rpgReloadClip: {fileID: 8300000, guid: b187942ab66cd4045b247aa4d824fe5b, type: 3}
 --- !u!114 &661721185
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53194,6 +53187,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a40dd635dfde4a3cb3a51e58b98a7d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clubWhooshClip: {fileID: 8300000, guid: 45169d6c0e3b241c580b245fd4246600, type: 3}
+  grenadeReloadImage: {fileID: 682173304}
+  rpgReloadImage: {fileID: 478749508}
+  pistolReloadImage: {fileID: 376492051}
+  pistolReloadClip: {fileID: 8300000, guid: 2c29f0894a6be4a9f92aad148631008c, type: 3}
+  grenadeReloadClip: {fileID: 8300000, guid: 2c29f0894a6be4a9f92aad148631008c, type: 3}
+  rpgReloadClip: {fileID: 8300000, guid: b187942ab66cd4045b247aa4d824fe5b, type: 3}
+  ammoFullClip: {fileID: 8300000, guid: 739b1b464aa414628852d7608d1bf859, type: 3}
 --- !u!114 &661721193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61107,14 +61108,14 @@ RectTransform:
   m_GameObject: {fileID: 831798843}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.00006151201}
-  m_LocalScale: {x: 0.05, y: 0.01, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.02, z: 1}
   m_Children: []
   m_Father: {fileID: 1915394405}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5, y: 0}
+  m_AnchoredPosition: {x: 6, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &831798845
@@ -66153,7 +66154,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.2206746, g: 0.5125565, b: 0.8207547, a: 1}
+      maxColor: {r: 1, g: 0.44401285, b: 0.4009434, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -85203,7 +85204,7 @@ RectTransform:
   m_GameObject: {fileID: 1330478061}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.00006151201}
-  m_LocalScale: {x: 0.05, y: 0.01, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.02, z: 1}
   m_Children: []
   m_Father: {fileID: 762044393}
   m_RootOrder: 2
@@ -98175,7 +98176,7 @@ RectTransform:
   m_GameObject: {fileID: 1510315685}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000060558334}
-  m_LocalScale: {x: 0.05, y: 0.01, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.02, z: 1}
   m_Children: []
   m_Father: {fileID: 762044393}
   m_RootOrder: 3
@@ -100686,14 +100687,14 @@ RectTransform:
   m_GameObject: {fileID: 1559857222}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000060558334}
-  m_LocalScale: {x: 0.05, y: 0.01, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.02, z: 1}
   m_Children: []
   m_Father: {fileID: 1915394405}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5, y: 0}
+  m_AnchoredPosition: {x: -6, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1559857224
@@ -108086,14 +108087,14 @@ RectTransform:
   m_GameObject: {fileID: 1742703997}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000061035185}
-  m_LocalScale: {x: 0.01, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.02, y: 0.05, z: 1}
   m_Children: []
   m_Father: {fileID: 1915394405}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 5}
+  m_AnchoredPosition: {x: 1, y: 5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1742703999
@@ -110094,7 +110095,7 @@ RectTransform:
   m_GameObject: {fileID: 1805295183}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000061035185}
-  m_LocalScale: {x: 0.01, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.02, y: 0.05, z: 1}
   m_Children: []
   m_Father: {fileID: 762044393}
   m_RootOrder: 0
@@ -111832,14 +111833,14 @@ RectTransform:
   m_GameObject: {fileID: 1840833719}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000061035185}
-  m_LocalScale: {x: 0.01, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.02, y: 0.05, z: 1}
   m_Children: []
   m_Father: {fileID: 1915394405}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -5}
+  m_AnchoredPosition: {x: 1, y: -5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1840833721
@@ -113124,7 +113125,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.2206746, g: 0.5125565, b: 0.8207547, a: 1}
+      maxColor: {r: 1, g: 0.44401285, b: 0.4009434, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -123479,7 +123480,7 @@ RectTransform:
   m_GameObject: {fileID: 2012136590}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.000061035185}
-  m_LocalScale: {x: 0.01, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.02, y: 0.05, z: 1}
   m_Children: []
   m_Father: {fileID: 762044393}
   m_RootOrder: 1
@@ -129447,7 +129448,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.2206746, g: 0.5125565, b: 0.8207547, a: 1}
+      maxColor: {r: 1, g: 0.44401285, b: 0.4009434, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -135656,7 +135657,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.2206746, g: 0.5125565, b: 0.8207547, a: 1}
+      maxColor: {r: 1, g: 0.44401285, b: 0.4009434, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -146022,7 +146023,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numAmmo: 10
-  ammoType: Grenade Thrower
+  weaponType: Grenade Thrower
 --- !u!4 &7040656493764111237 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1953193006964872268, guid: c4e225d89227c43349f851282df0683d, type: 3}

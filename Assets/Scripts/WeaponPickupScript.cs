@@ -22,7 +22,7 @@ public class WeaponPickupScript : MonoBehaviour
                 // Pick Up Weapon
                 _pickupSound.Play();
                 // Destroy pickup
-                Destroy(gameObject, 1f);
+                Destroy(gameObject, 0.5f);
                 // 1.0f delay and all below, just so audio can play before object is destroyed.
                 MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>(false);
                 foreach(MeshRenderer mesh in meshes ){

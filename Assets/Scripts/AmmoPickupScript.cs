@@ -5,7 +5,7 @@ using UnityEngine;
 public class AmmoPickupScript : MonoBehaviour
 {
     public int numAmmo = 10;
-    public string ammoType = "Grenade Thrower";
+    public string weaponType = "Grenade Thrower";
 
     void OnCollisionEnter(Collision collision)
     {
@@ -13,7 +13,7 @@ public class AmmoPickupScript : MonoBehaviour
         if (other.name == "Player")
         {
             // Boost Player Ammo
-            bool pickedUpAmmo = other.GetComponent<FireWeaponScript>().Reload(ammoType, numAmmo);
+            bool pickedUpAmmo = PlayerManager.Instance.ReloadWeapon(weaponType, numAmmo);
             if(pickedUpAmmo)
                 Destroy(gameObject);
         }

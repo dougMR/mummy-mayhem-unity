@@ -1,3 +1,13 @@
+        /*
+
+Wrote this to get weapons firing.
+
+This script is tangled with PlayerManager.cs 
+
+They should be combined.
+
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,28 +21,21 @@ public class FireWeaponScript : MonoBehaviour
     public GameObject bulletImpactPrefab;
     public AudioClip gunClip;
     public AudioClip emptyClip;
-    public AudioClip ammoFullClip;
     public AudioClip pistolClip;
     // public Image ammoBar;
-    public Image grenadeReloadImage;
-    public Image rpgReloadImage;
-    public Image pistolReloadImage;
-    public AudioClip pistolReloadClip;
-    public AudioClip grenadeReloadClip;
+
     public AudioClip clubWhooshClip;
-    public AudioClip rpgReloadClip;
+
     // private string _currentWeapon = "None";
     private float speed = 32;
-    private AudioSource _rpgReloadSound;
+    
     private AudioSource gunSound;
     private AudioSource emptySound;
-    private AudioSource ammoFullSound;
     private AudioSource _pistolSound;
-    private AudioSource _pistolReloadSound;
+    
     // private int maxAmmo = 100;
     // private int currentAmmo;
-    private Coroutine reloadCo;
-    private AudioSource _grenadeReloadSound;
+    
     private CauseCommotionScript _commotionScript;
     private GameObject _club;
     private AudioSource _clubWhooshSound;
@@ -66,12 +69,7 @@ public class FireWeaponScript : MonoBehaviour
             emptySound = gameObject.AddComponent<AudioSource>();
             emptySound.clip = emptyClip; //Resources.Load(name) as AudioClip;
         }
-        if (ammoFullClip != null)
-        {
-            ammoFullSound = gameObject.AddComponent<AudioSource>();
-            ammoFullSound.clip = ammoFullClip;
-            ammoFullSound.volume = 0.5f;
-        }
+        
         if (pistolClip != null)
         {
             _pistolSound = gameObject.AddComponent<AudioSource>();
@@ -79,33 +77,14 @@ public class FireWeaponScript : MonoBehaviour
             // pistolSound.volume = 0.5f;
         }
         // v Locating muzzleFlash should live in an init function (Start, Awake, etc)
-        // _muzzleFlash = GameObject.Find("Main Camera/Pistol/MuzzleFlash").GetComponent<ParticleSystem>();
+
         GameObject myCamera = GameObject.Find("Main Camera");
         _pistol = GameManager.Instance.FindChildByName(myCamera, "Pistol");
         _pistolCrosshair = GameManager.Instance.FindChildByName(myCamera, "CrosshairCanvas");
-        Debug.Log("_pistol:: "+_pistol.name);
+
         _muzzleFlash = GameManager.Instance.FindChildByName(myCamera, "MuzzleFlash").GetComponent<ParticleSystem>();
         // currentAmmo = maxAmmo;
-        Color c = grenadeReloadImage.color;
-        c.a = 0;
-        grenadeReloadImage.color = c;
-        rpgReloadImage.color = c;
-        pistolReloadImage.color = c;
-        if (grenadeReloadClip != null)
-        {
-            _grenadeReloadSound = gameObject.AddComponent<AudioSource>();
-            _grenadeReloadSound.clip = grenadeReloadClip;
-        }
-        if (pistolReloadClip != null)
-        {
-            _pistolReloadSound = gameObject.AddComponent<AudioSource>();
-            _pistolReloadSound.clip = pistolReloadClip;
-        }
-        if (rpgReloadClip != null)
-        {
-            _rpgReloadSound = gameObject.AddComponent<AudioSource>();
-            _rpgReloadSound.clip = rpgReloadClip;
-        }
+        
     }
 
     // void UpdateAmmoBar()
@@ -245,11 +224,14 @@ public class FireWeaponScript : MonoBehaviour
         if (!GameManager.Instance.GamePaused && (Input.GetKeyUp(KeyCode.G) || Input.GetMouseButtonDown(0)))
         {
             // Debug.Log("G key was released.");
-            Debug.Log("FireWeaponScript.currentWeapon: " + PlayerManager.Instance.CurrentWeapon.Name);
+            
             string weaponName = PlayerManager.Instance.CurrentWeapon.Equipped ? PlayerManager.Instance.CurrentWeapon.Name : "None";
             if (weaponName != "None" && PlayerManager.Instance.CurrentWeapon.Ammo <= 0 ){
                 weaponName = "Empty";
             }
+
+            Debug.Log("FireWeaponScript.currentWeapon: " + PlayerManager.Instance.CurrentWeapon.Name);
+
             if (weaponName == "Grenade Thrower")
             {
                 ThrowGrenade();
@@ -265,6 +247,7 @@ public class FireWeaponScript : MonoBehaviour
                 _commotionScript.CauseCommotion(5f, 3f);
             } else if (weaponName == "Pistol"){
                 FirePistol();
+                _commotionScript.CauseCommotion(10f, 3f);
             } else if (weaponName == "None") {
                 GameManager.Instance.ShowMessage("You Need a Weapon.", 0.1f);
             } else if (weaponName == "Empty"){
@@ -276,71 +259,7 @@ public class FireWeaponScript : MonoBehaviour
         }
     }
 
-    public bool Reload(string weaponType, int amount = 5 )
-    {
-        // currentAmmo = Mathf.Clamp(currentAmmo + amount, 0, maxAmmo);
-        if(weaponType == "") weaponType = PlayerManager.Instance.CurrentWeapon.Name;
-        bool usedAmmo = PlayerManager.Instance.GetWeaponByName(weaponType).AddAmmo(amount);
-        if( !usedAmmo ) {
-            if(PlayerManager.Instance.GetWeaponByName(weaponType).Equipped){
-                GameManager.Instance.ShowMessage(weaponType + " is full.");
-            } else {
-                // Player doesn't have this weapon equipped
-                GameManager.Instance.ShowMessage("You're carrying max \n\r"+weaponType + " ammo.");
-            }
-            
-            if(ammoFullSound) ammoFullSound.Play();
-
-            return false;
-        }
-        // UpdateAmmoBar();
-        Image reloadImage;
-        AudioSource reloadSound;
-        switch(weaponType) {
-        
-            case "Rocket Launcher":
-                reloadSound = _rpgReloadSound;
-                reloadImage = rpgReloadImage;
-                break;
-            case "Grenade Thrower":
-                reloadSound = _grenadeReloadSound;
-                reloadImage = grenadeReloadImage;
-                break;
-            case "Pistol":
-                reloadSound = _pistolReloadSound;
-                reloadImage = pistolReloadImage;
-                break;
-            default:
-                reloadSound = _clubWhooshSound;
-                reloadImage = grenadeReloadImage;
-                break;
-            
-        }
-        reloadSound.Play();
-        if (reloadCo != null)
-            StopCoroutine(reloadCo);
-        reloadCo = StartCoroutine(FlashImage(reloadImage));
-        return true;
-    }
-    IEnumerator FlashImage(Image whichImage)
-    {
-        // Debug.Log(" ----- CoRoutine START!!");
-        whichImage.gameObject.SetActive(true);
-        whichImage.color = Color.white;
-        for (float ft = 1f; ft >= 0; ft -= 0.1f)
-        {
-            // Debug.Log("FlashDamageImage(" + ft + ")");
-            Color c = whichImage.color;
-            if (ft < 0.1f)
-                ft = 0;
-
-            c.a = ft;
-            whichImage.color = c;
-            yield return new WaitForSeconds(.1f); ;
-        }
-        // Debug.Log(" ----- CoRoutine OVER!!");
-        whichImage.gameObject.SetActive(false);
-    }
+    
 
     /*
     // Moved CurrentWeapon to PlayerManager
