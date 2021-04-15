@@ -42,8 +42,11 @@ public class FireWeaponScript : MonoBehaviour
     private float _lastSwingTime = 0f;
     // private GameObject _gun;
     private ParticleSystem _muzzleFlash;
+    private GameObject _crosshairs;
     private GameObject _pistol;
-    private GameObject _pistolCrosshair;
+    private GameObject _AK47;
+    private float _lastFiredTime = 0;
+    private bool _triggerReleased = true;
 
     void Start()
     {
@@ -80,7 +83,8 @@ public class FireWeaponScript : MonoBehaviour
 
         GameObject myCamera = GameObject.Find("Main Camera");
         _pistol = GameManager.Instance.FindChildByName(myCamera, "Pistol");
-        _pistolCrosshair = GameManager.Instance.FindChildByName(myCamera, "CrosshairCanvas");
+        _AK47 = GameManager.Instance.FindChildByName(myCamera, "AK47");
+        _crosshairs = GameManager.Instance.FindChildByName(myCamera, "Crosshairs");
 
         _muzzleFlash = GameManager.Instance.FindChildByName(myCamera, "MuzzleFlash").GetComponent<ParticleSystem>();
         // currentAmmo = maxAmmo;
@@ -95,40 +99,58 @@ public class FireWeaponScript : MonoBehaviour
 
     void FirePistol() 
     {
-        Debug.Log("FireWeaponScript.FirePistol()");
-        Transform cameraTransform = Camera.main.transform;
-        Vector3 pistolPos = cameraTransform.position; //_pistol.transform.position;
-        Vector3 shotDirection = cameraTransform.forward;
+        Debug.Log("FireWeaponScript.FirePistol()");        
+        Weapon weapon = PlayerManager.Instance.GetWeaponByName("Pistol");
+        // if (_pistolSound != null)
+        //     _pistolSound.PlayOneShot(pistolClip, 1f);        
+        PlayerManager.Instance.Audio.PlayOneShot(weapon.FireClip);
         
-        
-        if (_pistolSound != null)
-            _pistolSound.PlayOneShot(pistolClip, 1f);
         // 1. muzzle flash
+        // !!! Move muzzleflash when we change weapon
+        _muzzleFlash.transform.position = weapon.MyGO.transform.position;
         _muzzleFlash.Play();
+        _pistol.GetComponent<Animator>().Play("Pistol Kick", -1, 0f);
 
         //   1b. hide crosshair
-        _pistolCrosshair.SetActive(false);
+        _crosshairs.SetActive(false);
         GameManager.Instance.DelayFunction( ()=>{
-            _pistolCrosshair.SetActive(true);
+            _crosshairs.SetActive(true);
         }, 1f );
         
         // 2. cast forward-facing ray
-        RaycastHit hit;
-        if (Physics.Raycast(pistolPos, shotDirection, out hit, Mathf.Infinity))
-        {
-            Debug.DrawRay(pistolPos, shotDirection * hit.distance, Color.yellow, 10);
-            // Debug.Log("Did Hit :: "+hit.collider.name+" , dist:: "+hit.distance);
-            // Quaternion quatRot = Quaternion.Inverse(cameraTransform.rotation);
-            // Quaternion quatRot = Quaternion.Euler(-cameraTransform.rotation.eulerAngles);
-            GameObject bulletImpact = Instantiate(bulletImpactPrefab, hit.point, cameraTransform.rotation) as GameObject;
+        ShootBullet();
+        //   2b. get distance of ray hit
+        //   2c. calculate time for bullet to travel that distance
+        //   2d. wait that duration
+        //   2e. cast same ray, get ray hit
+        //   2f. spawn bullet impact at that point
+        //     2f1. impact smoke puff particle emitter
+        //     2f2. tiny explosion at that point
+        // 
 
-            GameManager.Instance.Explode( hit.point, 0.1f, 64f, null, "Enemies");
-            if( hit.rigidbody != null )
-            {
-                hit.rigidbody.AddForceAtPosition( shotDirection*100, hit.point );
-            }
-            
-        }
+    }
+
+    void FireAK47() 
+    {
+        Debug.Log("FireWeaponScript.FireAK47()");    
+
+        Weapon weapon = PlayerManager.Instance.GetWeaponByName("AK47");
+        
+        PlayerManager.Instance.Audio.PlayOneShot(weapon.FireClip);
+        
+        // 1. muzzle flash
+        _muzzleFlash.transform.position = weapon.MyGO.transform.position;
+        _muzzleFlash.Play();
+        _AK47.GetComponent<Animator>().Play("AKkick", -1, 0f);
+
+        //   1b. hide crosshair
+        _crosshairs.SetActive(false);
+        GameManager.Instance.DelayFunction( ()=>{
+            _crosshairs.SetActive(true);
+        }, 1f );
+        
+        // 2. cast forward-facing ray
+        ShootBullet(96f, 0.3f);
         //   2b. get distance of ray hit
         //   2c. calculate time for bullet to travel that distance
         //   2d. wait that duration
@@ -161,13 +183,16 @@ public class FireWeaponScript : MonoBehaviour
 
     }
 
-    void ThrowGrenade()
+    void LaunchGrenade()
     {
+        
         if (PlayerManager.Instance.CurrentWeapon.Ammo <= 0)
         {
             emptySound.Play();
             return;
         }
+        Weapon weapon = PlayerManager.Instance.GetWeaponByName("Grenade Launcher");
+        weapon.MyGO.GetComponent<Animator>().Play("Kick", -1, 0f);
         // currentAmmo -= 1;
         
         if (gunSound != null)
@@ -219,23 +244,77 @@ public class FireWeaponScript : MonoBehaviour
     }
 
 
+    void ShootBullet( float impactPower = 64f, float impactRadius = 0.2f ){
+
+        Debug.Log("FireWeaponScript.ShootBullet()");
+        Transform cameraTransform = Camera.main.transform;
+        Vector3 pistolPos = cameraTransform.position;
+        Vector3 shotDirection = cameraTransform.forward;
+        
+        // 2. cast forward-facing ray
+        RaycastHit hit;
+        if (Physics.Raycast(pistolPos, shotDirection, out hit, Mathf.Infinity))
+        {
+            // Debug.DrawRay(pistolPos, shotDirection * hit.distance, Color.yellow, 10);
+            // Debug.Log("Did Hit :: "+hit.collider.name+" , dist:: "+hit.distance);
+            
+            GameObject bulletImpact = Instantiate(bulletImpactPrefab, hit.point, cameraTransform.rotation) as GameObject;
+
+            GameManager.Instance.Explode( hit.point, impactRadius, impactPower, null, "Enemies");
+            if( hit.rigidbody != null )
+            {
+                hit.rigidbody.AddForceAtPosition( shotDirection*impactPower*2, hit.point );
+            }
+            
+        }
+        //   2b. get distance of ray hit
+        //   2c. calculate time for bullet to travel that distance
+        //   2d. wait that duration
+        //   2e. cast same ray, get ray hit
+        //   2f. spawn bullet impact at that point
+        //     2f1. impact smoke puff particle emitter
+        //     2f2. tiny explosion at that point
+        // 
+
+    
+    }
+
+
     void Update()
     {
-        if (!GameManager.Instance.GamePaused && (Input.GetKeyUp(KeyCode.G) || Input.GetMouseButtonDown(0)))
+        if( GameManager.Instance.GamePaused ) {
+            return;
+        }
+        if (Input.GetKeyUp(KeyCode.G) || Input.GetMouseButtonUp(0))
         {
-            // Debug.Log("G key was released.");
+            _triggerReleased = true;
+        }
+        else if (Input.GetKey(KeyCode.G) || Input.GetMouseButton(0))
+        {
+            float autoFrequency = PlayerManager.Instance.CurrentWeapon.AutoFrequency;
+            bool canfire = _triggerReleased || 
+                    ( autoFrequency > 0 && Time.time - _lastFiredTime > autoFrequency );
+
+            if( !canfire ) {
+                // Not long enough since last shot, abort
+                return;
+            }
+            _lastFiredTime = Time.time;
+            _triggerReleased = false;
             
             string weaponName = PlayerManager.Instance.CurrentWeapon.Equipped ? PlayerManager.Instance.CurrentWeapon.Name : "None";
-            if (weaponName != "None" && PlayerManager.Instance.CurrentWeapon.Ammo <= 0 ){
-                weaponName = "Empty";
-            }
+            bool weaponEmpty = weaponName != "None" && PlayerManager.Instance.CurrentWeapon.Ammo <= 0;
 
             Debug.Log("FireWeaponScript.currentWeapon: " + PlayerManager.Instance.CurrentWeapon.Name);
 
-            if (weaponName == "Grenade Thrower")
+            if ( weaponEmpty )
             {
-                ThrowGrenade();
-                _commotionScript.CauseCommotion(10f, 3f);
+                GameManager.Instance.ShowMessage("You Need Ammo", 0.1f);
+            }
+            else if (weaponName == "Grenade Launcher")
+            {
+                LaunchGrenade();
+                _commotionScript.CauseCommotion(8f, 3f);
             }
             else if (weaponName == "Rocket Launcher")
             {
@@ -248,15 +327,17 @@ public class FireWeaponScript : MonoBehaviour
             } else if (weaponName == "Pistol"){
                 FirePistol();
                 _commotionScript.CauseCommotion(10f, 3f);
+            } else if (weaponName == "AK47"){
+                FireAK47();
+                _commotionScript.CauseCommotion(10f, 3f);
             } else if (weaponName == "None") {
                 GameManager.Instance.ShowMessage("You Need a Weapon.", 0.1f);
-            } else if (weaponName == "Empty"){
-                GameManager.Instance.ShowMessage("You Need Ammo", 0.1f);
             }
             if(PlayerManager.Instance.CurrentWeapon.Equipped)
                 PlayerManager.Instance.CurrentWeapon.AddAmmo(-1);
             // UpdateAmmoBar();
         }
+        
     }
 
     

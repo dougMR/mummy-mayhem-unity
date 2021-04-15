@@ -10,6 +10,7 @@ public class SlidingDoorScript : MonoBehaviour
     public bool openOnly = false;
     public bool playerOnly = true;
     public bool remoteTrigger = false;
+    // public GameObject remoteTrigger = null;
     private Animator _animator;
     private bool _isOpen = false;
 
@@ -22,24 +23,6 @@ public class SlidingDoorScript : MonoBehaviour
         // Debug.Log("useCollide: " + useCollide);
         // Debug.Log("useTrigger: " + useTrigger);
     }
-
-    /* Removed Rigidbody
-    void OnCollisionEnter(Collision collision)
-    {
-        if (useCollide && collision.gameObject != ignoreGO)
-        {
-            // Debug.Log("SlidingDoor -> OnCOllisionEnter()");
-            if (!_isOpen)
-            {
-                Open();
-            }
-            else
-            {
-                Close();
-            }
-        }
-    }
-    */
     
 
     void OnTriggerEnter(Collider other)

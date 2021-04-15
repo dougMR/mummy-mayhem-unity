@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numAmmo: 10
-  ammoType: Grenade Thrower
+  weaponType: Grenade Launcher
 --- !u!54 &5286719803648706593
 Rigidbody:
   m_ObjectHideFlags: 0

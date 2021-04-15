@@ -1622,7 +1622,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numAmmo: 10
-  ammoType: Rocket Launcher
+  weaponType: Rocket Launcher
 --- !u!1 &5252448620255569309
 GameObject:
   m_ObjectHideFlags: 0

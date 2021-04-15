@@ -215,8 +215,21 @@ public class GameManager : Singleton<GameManager>
         fullColor.a = 1f;
         _spriteHolderImage.color = fullColor;
         _spriteHolderImage.gameObject.SetActive(true);
-
-        _spriteHolderImage.rectTransform.sizeDelta = new Vector2(sprite.rect.width, sprite.rect.height);
+        float limitH = 400f;
+        float limitW = 600f;
+        float limitRatio = limitW/limitH;
+        float spriteW = sprite.rect.width;
+        float spriteH = sprite.rect.height;
+        float spriteRatio = spriteW / spriteH;
+        float scale = 1;
+        if( limitRatio > spriteRatio ) {
+            // sprite Ratio is narrower than limit Ratio, so...
+            scale = limitH/spriteH;
+        } else {
+            // sprite ratio is wider, so...
+            scale = limitW/spriteW;
+        }
+        _spriteHolderImage.rectTransform.sizeDelta = new Vector2(spriteW * scale, spriteH * scale);
 		_spriteHolderImage.sprite = sprite;
         if (_spriteCo != null)
             StopCoroutine(_spriteCo);

@@ -19,8 +19,8 @@ public class EnemyAIScript : MonoBehaviour
     // public bool chasingPlayer = false;
     public float _maxHP = 10f;
     private float _HP = 10f;
-    private float _moveForceWander = 0.5f;
-    private float _moveForceChase = 1.2f;
+    private float _moveForceWander = 0.65f;
+    private float _moveForceChase = 1.5f;
     private float _moveForce = 0.5f;
     private GameObject _chaseTarget = null;
     private float _chaseDist = 20f;
@@ -76,7 +76,7 @@ public class EnemyAIScript : MonoBehaviour
         if(attackClip != null) {
             _attackSound = gameObject.AddComponent<AudioSource>();
             _attackSound.clip = attackClip;
-            _attackSound.volume = 0.7f;
+            _attackSound.volume = 0.55f;
         }
         if(hitMeClip != null ) {
             _hitMeSound = gameObject.AddComponent<AudioSource>();
