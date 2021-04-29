@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class InventoryItemPickup : MonoBehaviour
 {
-    
+
     public string myName;
     public Sprite mySprite;
     // private InventoryItem _myItem;
     // private string _spritePath;
-    
+
 
     // Start is called before the first frame update
     void Start()
     {
-       
+
         /*
         _spritePath = AssetDatabase.GetAssetPath(mySprite);
         int indexStart = _spritePath.IndexOf("Resources/") + 10;
@@ -25,9 +25,10 @@ public class InventoryItemPickup : MonoBehaviour
         // _myItem = new InventoryItem(name, spritePath);
     }
 
-    void OnTriggerEnter( Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        if(other.name == "Player"){
+        if (other.name == "Player")
+        {
             // Debug.Log("ItemPickup.OnTriggerEnter()");
             Pickup();
         }
@@ -39,7 +40,8 @@ public class InventoryItemPickup : MonoBehaviour
         InventoryItem item = InventoryManager.Instance.AddItem(myName, mySprite);
         // Flash item's sprite on screen
         item.ShowSprite();
-        GameManager.Instance.ShowMessage("You picked up the "+myName, 0.5f);
+        // GameManager.Instance.ShowMessage("You picked up the "+myName, 0.5f);
+        // Better not to announce events that can be seen?
         Destroy(gameObject);
     }
 }

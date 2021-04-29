@@ -12,29 +12,33 @@ public class GameManager : Singleton<GameManager>
     // public Text OutputField;
     public GameObject pausedScreen;
     public GameObject controlsText;
+    public GameObject commotionPrefab;
     private int _score = 0;
     private Coroutine _messageCo = null;
+    private Coroutine _messageZoomCo = null;
     // private bool _messageCoRunning = false;
     private Coroutine _spriteCo;
     private static bool _gameIsPaused;
     private Image _spriteHolderImage;
     private string _lastMessage = "";
-    private float _lastMessageTime = 0;
-    private float _timeRemainingInCurrentMessage = 0;
-    private GameObject _player;       
+    private float _lastMessageTime = 0f;
+    private float _timeRemainingInCurrentMessage = 0f;
+    private float _defaultMessageDuration = 2f;
+    private GameObject _player;
     private int _difficultyLevel = 1;
-    
+
     protected override void Awake()
     {
         base.Awake();
         HUDTextField.gameObject.SetActive(false);
         pausedScreen.SetActive(false);
-        _spriteHolderImage = GameObject.Find ("UI_Canvas/SpriteHolderImage").GetComponent<Image>();
+        _spriteHolderImage = GameObject.Find("UI_Canvas/SpriteHolderImage").GetComponent<Image>();
         _spriteHolderImage.gameObject.SetActive(false);
         // Debug.Log("_spriteHolderImage:: "+_spriteHolderImage);
         _player = GameObject.Find("Player");
     }
-    void Start(){
+    void Start()
+    {
         StartGame();
     }
     private void Update()
@@ -42,7 +46,9 @@ public class GameManager : Singleton<GameManager>
         if (Input.GetKeyDown(KeyCode.P))
         {
             GamePaused = !GamePaused;
-        }else if (Input.GetKeyDown(KeyCode.L)){
+        }
+        else if (Input.GetKeyDown(KeyCode.L))
+        {
             // SHow Last Message
             ShowLastMessage();
         }
@@ -54,27 +60,29 @@ public class GameManager : Singleton<GameManager>
         // Debug.Log("    StartGame unscaledDeltaTime: " +Time.realtimeSinceStartup);
         PauseFor(messageTime);
         // Debug.Log("    StartGame unscaledDeltaTime: " +Time.realtimeSinceStartup);
+        Cursor.lockState = CursorLockMode.Confined; // <- doesn't work on Mac :(
     }
 
-    public void PauseFor( float secs = 1f ) {
+    public void PauseFor(float secs = 1f)
+    {
         GamePaused = true;
         StartCoroutine(UnpauseIn(secs));
     }
-    IEnumerator UnpauseIn( float secs = 1f )
+    IEnumerator UnpauseIn(float secs = 1f)
     {
         // Debug.Log("==========================\n\rUnpauseIn( "+secs+", starting at "+Time.realtimeSinceStartup+" )");
         float startPauseTime = Time.realtimeSinceStartup;
-        yield return new WaitForSecondsRealtime( secs );
+        yield return new WaitForSecondsRealtime(secs);
         GamePaused = false;
         // Debug.Log("UnpauseIn duration = "+(Time.realtimeSinceStartup - startPauseTime)+", ending at (unscaled)"+Time.unscaledTime+" vs (scaled)"+Time.time);
     }
-    public void DelayFunction( System.Action callback, float secs)
+    public void DelayFunction(System.Action callback, float secs)
     {
-        StartCoroutine( DelayFunctionCo(callback,secs) );
+        StartCoroutine(DelayFunctionCo(callback, secs));
     }
-    IEnumerator DelayFunctionCo( System.Action callback, float secs )
+    IEnumerator DelayFunctionCo(System.Action callback, float secs)
     {
-        yield return new WaitForSeconds( secs );
+        yield return new WaitForSeconds(secs);
         callback();
     }
 
@@ -91,16 +99,18 @@ public class GameManager : Singleton<GameManager>
     //     spritePath = spritePath.Substring(indexStart, length);
     //     return spritePath;
     // }
-    public void ShowLastMessage(){
+    public void ShowLastMessage()
+    {
         // Debug.Log("ShowLastMessage()");
         ShowMessage(_lastMessage);
     }
-    
+
     public float ShowMessage(string message, float delay = 0f)
     {
         // Don't show this message if the same message has been shown in the last [5] seconds
-       
-        if(message == _lastMessage && Time.time - _lastMessageTime < 5f ){
+
+        if (message == _lastMessage && Time.time - _lastMessageTime < 5f)
+        {
             return 0;
         }
 
@@ -108,14 +118,15 @@ public class GameManager : Singleton<GameManager>
 
         // pause delay seconds
 
-        if(delay > 0f || _timeRemainingInCurrentMessage > 0f){
-            
+        if (delay > 0f || _timeRemainingInCurrentMessage > 0f)
+        {
+
             // Debug.Log("message delay:: "+delay);
             delay = delay > 0f ? delay : _timeRemainingInCurrentMessage;
             StartCoroutine(DelayMessage(message, delay));
             return 0;
         }
-        // base duration on length of message
+        // set duration by string length of message
         float duration = 1f + message.Length / 30f;
         // Debug.Log("duration = 1f + "+message.Length+" / 30 = "+duration);
         _lastMessage = message;
@@ -129,38 +140,67 @@ public class GameManager : Singleton<GameManager>
         HUDTextField.gameObject.SetActive(true);
         HUDTextField.text = message;
 
-        if (_messageCo!=null){
+        if (_messageCo != null)
+        {
             // Debug.Log("_messageCo != null");
             StopCoroutine(_messageCo);
         }
+        if (_messageZoomCo != null)
+        {
+            // Debug.Log("_messageZoomCo != null");
+            StopCoroutine(_messageZoomCo);
+        }
+        _messageZoomCo = StartCoroutine(ZoomMessageIn(duration));
         _messageCo = StartCoroutine(HideMessage(duration));
         // Debug.Log("End ShowMessage()");
         return duration;
     }
 
-    IEnumerator DelayMessage(string message, float delay){
-        
+    IEnumerator DelayMessage(string message, float delay)
+    {
+
         // Debug.Log("DelayMessage( "+delay+" )");
 
         yield return new WaitForSeconds(delay);
         ShowMessage(message);
     }
-    
+
+    IEnumerator ZoomMessageIn(float dur = 2f)
+    {
+        Debug.Log("GM.ZoomMessageIn()");
+        // Zoom Message for dur seconds
+        float startZ = 50f;
+        float endZ = 0f;
+        RectTransform HUDTextRectTransform = HUDTextField.GetComponent<RectTransform>();
+        float X = HUDTextRectTransform.anchoredPosition3D.x;
+        float Y = HUDTextRectTransform.anchoredPosition3D.y;
+        float Z = startZ;
+        HUDTextRectTransform.anchoredPosition3D = new Vector3(X, Y, Z);
+
+        // zoom in
+        float counter = 0f;
+        while (counter < dur)
+        {
+            // Debug.Log("HUDTextRectTransform.anchoredPosition3D:: " + HUDTextRectTransform.anchoredPosition3D);
+            counter += Time.unscaledDeltaTime;
+            Z = Mathf.Lerp(startZ, endZ, counter / dur);
+            //Debug.Log("zoom Z:: " + Z);
+            //Debug.Log("zoom-in counter/dur : " + counter + " / " + dur + " = " + (counter / dur));
+            HUDTextRectTransform.anchoredPosition3D = new Vector3(X, Y, Z);
+            yield return null;
+        }
+    }
     IEnumerator HideMessage(float dur = 2f)
     {
         // Hide Message after dur seconds
         // Debug.Log("HideMessage after "+dur+" seconds");
-        RectTransform HUDTextRectTransform = HUDTextField.GetComponent<RectTransform>();
-        float X = HUDTextRectTransform.anchoredPosition3D.x; //HUDTextField.transform.localPosition.x;
-        float Y = HUDTextRectTransform.anchoredPosition3D.y;
-        float Z = 0.0f;
-        HUDTextRectTransform.anchoredPosition3D = new Vector3(X, Y, Z);
+
         float fadeDuration = 0.5f;
         _timeRemainingInCurrentMessage = dur + fadeDuration;
-        float startWaitTime = Time.realtimeSinceStartup;
+        // float startWaitTime = Time.realtimeSinceStartup;
         // Debug.Log("start Hidemessage start at "+startWaitTime);
         int loops = 0;
-        while(_timeRemainingInCurrentMessage > fadeDuration) //While there is still time
+        while (_timeRemainingInCurrentMessage > fadeDuration) //While there is still time
         {
             // Debug.Log("HideMessage counting down... "+Time.deltaTime+" vs "+Time.unscaledDeltaTime);
             _timeRemainingInCurrentMessage -= Time.unscaledDeltaTime; //Reduce the timer with time between previous and actual frame
@@ -173,12 +213,18 @@ public class GameManager : Singleton<GameManager>
 
         // fade out
         // Debug.Log("HideMessage Fadeout Start: "+Time.realtimeSinceStartup);
+        RectTransform HUDTextRectTransform = HUDTextField.GetComponent<RectTransform>();
+        float X = HUDTextRectTransform.anchoredPosition3D.x; //HUDTextField.transform.localPosition.x;
+        float Y = HUDTextRectTransform.anchoredPosition3D.y;
+        float startZ = HUDTextRectTransform.anchoredPosition3D.z;
+        float Z = startZ;
+        HUDTextRectTransform.anchoredPosition3D = new Vector3(X, Y, Z);
 
         Color currentColor = HUDTextField.color;
         Outline outline = HUDTextField.GetComponent<Outline>();
         Color outlineColor = outline.effectColor;
         float alpha = 1;
-        
+
         // Debug.Log("HUDTextRectTransform.anchoredPosition3D:: "+HUDTextRectTransform.anchoredPosition3D);
         // HUDTextField.transform.position = new Vector3(0,0,Z);
         // 
@@ -188,7 +234,7 @@ public class GameManager : Singleton<GameManager>
             counter += Time.deltaTime;
 
             alpha = Mathf.Lerp(1, 0, counter / fadeDuration);
-            Z = Mathf.Lerp(0f, 500f, counter / fadeDuration);
+            Z = Mathf.Lerp(startZ, 500f, counter / fadeDuration);
             // Debug.Log("Z: "+Z);
             HUDTextRectTransform.anchoredPosition3D = new Vector3(X, Y, Z);
             // Debug.Log("HUDTextRectTransform.anchoredPosition3D:: "+HUDTextRectTransform.anchoredPosition3D);
@@ -208,7 +254,8 @@ public class GameManager : Singleton<GameManager>
         // Debug.Log("HideMessage Fadeout Done, at "+Time.realtimeSinceStartup);
     }
 
-    public void ShowSprite( Sprite sprite, float duration = 0.5f ){
+    public void ShowSprite(Sprite sprite, float duration = 0.5f)
+    {
         // Debug.Log("GameManager.ShowSprite()");
         // Debug.Log("sprite: "+sprite);
         Color fullColor = _spriteHolderImage.color;
@@ -217,25 +264,29 @@ public class GameManager : Singleton<GameManager>
         _spriteHolderImage.gameObject.SetActive(true);
         float limitH = 400f;
         float limitW = 600f;
-        float limitRatio = limitW/limitH;
+        float limitRatio = limitW / limitH;
         float spriteW = sprite.rect.width;
         float spriteH = sprite.rect.height;
         float spriteRatio = spriteW / spriteH;
         float scale = 1;
-        if( limitRatio > spriteRatio ) {
+        if (limitRatio > spriteRatio)
+        {
             // sprite Ratio is narrower than limit Ratio, so...
-            scale = limitH/spriteH;
-        } else {
+            scale = limitH / spriteH;
+        }
+        else
+        {
             // sprite ratio is wider, so...
-            scale = limitW/spriteW;
+            scale = limitW / spriteW;
         }
         _spriteHolderImage.rectTransform.sizeDelta = new Vector2(spriteW * scale, spriteH * scale);
-		_spriteHolderImage.sprite = sprite;
+        _spriteHolderImage.sprite = sprite;
         if (_spriteCo != null)
             StopCoroutine(_spriteCo);
         _spriteCo = StartCoroutine(HideSprite(duration));
     }
-    IEnumerator HideSprite( float dur = 0.5f ){
+    IEnumerator HideSprite(float dur = 0.5f)
+    {
         // Display Sprite for dur seconds
         yield return new WaitForSeconds(dur);
         // fade out
@@ -263,78 +314,107 @@ public class GameManager : Singleton<GameManager>
     //     OutputField.text = prevTxt + txt;
     // }
 
-    public void Explode( Vector3 explosionPos, float radius, float explosionForce, GameObject explosionGO, string maskLayerName = "Enemies"){
-        // Debug.Log("GameManager.Explode()");
+    public void Explode(Vector3 explosionPos, float radius, float explosionForce, GameObject explosionGO, string maskLayerName = "Enemies")
+    {
+        Debug.Log("GameManager.Explode()");
 
         float upwardsModifier = 1.0F;
 
-        int layerInt = LayerMask.NameToLayer(maskLayerName); // -1 if not found
-        int layerMask = layerInt == -1 ? ~0 : 1 << layerInt; // ~ is bitwise NOT, so ~0 means All Layers
+        // int layerInt = LayerMask.NameToLayer(maskLayerName); // -1 if not found
+        // int layerMask = layerInt == -1 ? ~0 : 1 << layerInt; // ~ is bitwise NOT, so ~0 means All Layers
+
+        // int playerLayer = 1 << LayerMask.NameToLayer("Player");
+        // layerMask = layerMask | playerLayer;
+        int layerMask = ~0;
 
         // Check for Explosion hit Mummies
         Collider[] colliders = Physics.OverlapSphere(explosionPos, radius, layerMask);
-        
-        // Debug.Log("#colliders ==> "+colliders.Length);
+        List<Collider> usedColliders = new List<Collider>();
+        Debug.Log("GM.Explode #colliders ==> " + colliders.Length);
 
-        for (int i = 0; i < colliders.Length; i++) 
+        for (int i = 0; i < colliders.Length; i++)
         {
             Collider coll = colliders[i];
+            /*
+            if (usedColliders.Contains(coll))
+            {
+                // skip this collider
+                Debug.Log("Skip This Collider!!");
+                break;
+            }
+            usedColliders.AddRange(coll.GetComponentsInChildren<Collider>());
+            */
             Rigidbody rb = coll.GetComponent<Rigidbody>();
 
             if (rb != null) // && !rb.CompareTag("Player") )
             {
+                Debug.Log("GameManager.Explode i :: " + i + " :: " + rb.name);
                 // Does the ray intersect any objects excluding the rb
                 bool exposed = true;
-                RaycastHit hit;
-                Vector3 dir = (explosionPos - rb.position).normalized;
+
+                Vector3 dir = (rb.position - explosionPos).normalized;
+                if (dir.magnitude == 0) dir = Vector3.up;
                 // Get dist to point of intersection
-                Ray ray = new Ray(explosionPos, rb.position - explosionPos);
+                RaycastHit hit;
+                Ray ray = new Ray(explosionPos, dir);
+                Debug.Log("GM.Explode (rb.position - explosionPos) : " + (rb.position - explosionPos));
+
+                Debug.Log("GameManager.Explode Dir (" + dir + ") vs ray.direction (" + ray.direction + ")");
                 float dist;
                 if (coll.Raycast(ray, out hit, radius))
                 {
                     // Distance to point of ray intersect collider
                     dist = hit.distance;
-                } else {
+                }
+                else
+                {
                     // Distance to rigidbody position
                     dist = Mathf.Clamp(Vector3.Distance(rb.position, explosionPos), 0, radius);
                 }
-                    
+
                 // Does the ray intersect any objects excluding the player layer
                 if (Physics.Raycast(rb.transform.position, dir, out hit, dist))
                 {
-                    if(hit.collider != null){
+                    if (hit.collider != null)
+                    {
                         Debug.Log("GameManager.Explode Hit...");
-                        Debug.Log("GameManager.Explode hit ==> "+hit);
+                        Debug.Log("GameManager.Explode hit ==> " + hit);
                         // Debug.Log("hit.rigidbody ==> "+hit.rigidbody);
-                        Debug.Log("GameManager.Explode hit.transform.name ==> "+hit.transform.name);
+                        Debug.Log("GameManager.Explode hit.transform.name ==> " + hit.transform.name);
                         // Debug.Log("rb ==> "+rb);
                         // Debug.Log("rb.transform ==> "+rb.transform);
                         // Debug.Log("_player.transform ==> "+_player.transform);
-                        
-                        exposed =  coll == hit.collider 
-                        || hit.transform.IsChildOf(rb.transform) 
-                        || hit.transform == _player.transform 
-                        || hit.transform.IsChildOf(_player.transform) 
-                        || (hit.rigidbody && hit.rigidbody.isKinematic) 
+
+                        exposed = coll == hit.collider
+                        || hit.transform.IsChildOf(rb.transform)
+                        || hit.transform == _player.transform
+                        || hit.transform.IsChildOf(_player.transform)
+                        || (hit.rigidbody && hit.rigidbody.isKinematic)
                         || hit.collider.isTrigger
-                        || hit.transform.name.Contains("Ground"); 
+                        || hit.transform.name.Contains("Ground");
                     }
                 }
-                if( exposed ) {
-                    Debug.Log("GM Explode exposed = true");
-                    if ( rb.CompareTag("Mummy") && !rb.name.Contains("Separated"))
+                if (exposed)
+                {
+                    // Debug.Log("GM Explode exposed = true");
+                    IDamageable damageable = rb.GetComponent<IDamageable>();
+                    // if (rb.CompareTag("Mummy") && !rb.name.Contains("Separated"))
+                    if (damageable != null)
                     {
                         // Apply Damage 
-                        
+
                         float damagef = explosionForce / 10f;
-                        damagef *= (radius-dist) / radius;
+                        damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
-                        Debug.Log("GameManager Explode Mummy, damage to apply ==> "+damage);
+
+                        Debug.Log("GameManager Explode hit [" + rb.name + "], damage to apply ==> " + damage);
                         // GameObject[] debris = 
                         // if (damage > 0)
-                        rb.GetComponent<EnemyAIScript>().ApplyDamage( damage );
+
+                        damageable.TakeDamage(damage);
                         // Debug.Log("debris.length ==> "+debris.Length);
-                    }else if (rb.name == "Head" || rb.name == "Torso" || rb.name == "Legs")
+                    }
+                    else if (rb.name == "Head" || rb.name == "Torso" || rb.name == "Legs")
                     {
                         List<GameObject> pieces = rb.GetComponent<SubdivideObjectScript>().SubdivideMe();
                         // Debug.Log("pieces.Length: "+pieces.Length);
@@ -346,39 +426,65 @@ public class GameManager : Singleton<GameManager>
                         //     piece.GetComponent<Rigidbody>().AddExplosionForce(explodePower, explosionPos, radius, upwardsModifier);
                         // }
                     }
-                    // else
-                    // {
-                    //     rb.AddExplosionForce(explodePower, explosionPos, radius, upwardsModifier);
-                    // }
-                }else{
+                    else if (rb.gameObject == _player)
+                    {
+                        // This damage calculation is redundant with Mummy damage calculation above ^
+                        float damagef = explosionForce / 10f;
+                        damagef *= (radius - dist) / radius;
+                        int damage = 1 + (int)Mathf.Ceil(damagef);
+                        // Debug.Log("GM.Explode, damage to Player:: " + damage);
+                        if (damageable != null)
+                        {
+                            damageable.TakeDamage(damage);
+                        }
+                        Debug.Log("GM.Explode hit Player");
+                    }
+                    else
+                    {
+                        // rb.AddExplosionForce(explodePower, explosionPos, radius, upwardsModifier);
+                        Debug.Log("GM.Explode found no damageable");
+                    }
+                }
+                else
+                {
+                    // Not exposed
                     // Debug.Log("Collider "+rb.name+" Blocked By ==> "+hit.rigidbody.name);
                 }
+            }
+            else
+            {
+                Debug.Log("GM.Explode coll[" + i + "] has no RB");
             }
         }
 
         // Apply explosion force to nearby objects, and their rigidbody children
         Collider[] colliders1 = Physics.OverlapSphere(explosionPos, radius, ~0); //~0
-        
-        for (int i = 0; i < colliders1.Length; i++) 
+
+        for (int i = 0; i < colliders1.Length; i++)
         {
             Collider collider = colliders1[i];
             Rigidbody[] RBs = collider.GetComponentsInChildren<Rigidbody>();
 
             // If no child rbs, look for rigidbody in top parent
-            if (RBs.Length == 0 ) {
+            if (RBs.Length == 0)
+            {
                 // Debug.Log("GameManager - NO RBs");
                 // Collider has no Rigidbody
                 // Look for Rigidbody in root parent
                 //Transform topParent = collider.transform.root;
                 Rigidbody topRB = collider.GetComponentInParent<Rigidbody>();// topParent.GetComponent<Rigidbody>();
-                
-                if(topRB != null){
+
+                if (topRB != null)
+                {
                     // Debug.Log("topRB:: "+topRB.name);
                     topRB.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
                 }
-            } else {
-                foreach(Rigidbody rb in RBs){
-                
+            }
+            else
+            {
+                foreach (Rigidbody rb in RBs)
+                {
+
                     if (rb != null) // && !rb.CompareTag("Player") )
                     {
                         /*if
@@ -409,20 +515,28 @@ public class GameManager : Singleton<GameManager>
                     }
                 }
             }
-            
+
         }
 
         // show explosion
-        if(explosionGO != null){
+        if (explosionGO != null)
+        {
             GameObject expl = (GameObject)Instantiate(explosionGO, explosionPos, Quaternion.identity);
 
             Destroy(expl, 3); // delete the explosion after 3 seconds
             // Debug.Log("expl: " + expl);
         }
-        
+
     }
 
-    void SetPaused(bool value )
+    public void CauseCommotion(float radius, float duration)
+    {
+        GameObject commotion = Instantiate(commotionPrefab, transform.position, Quaternion.identity);
+        commotion.GetComponent<CommotionScript>().Duration = duration;
+        commotion.GetComponent<CommotionScript>().Radius = radius;
+    }
+
+    void SetPaused(bool value)
     {
         _gameIsPaused = value;
         if (value)
@@ -437,11 +551,13 @@ public class GameManager : Singleton<GameManager>
         pausedScreen.gameObject.SetActive(value);
     }
 
-    public GameObject FindChildByName( GameObject parent, string name)
+    public GameObject FindChildByName(GameObject parent, string name)
     {
-        Transform[] trs= parent.GetComponentsInChildren<Transform>(true);
-        foreach(Transform t in trs){
-            if(t.name == name){
+        Transform[] trs = parent.GetComponentsInChildren<Transform>(true);
+        foreach (Transform t in trs)
+        {
+            if (t.name == name)
+            {
                 return t.gameObject;
             }
         }
@@ -458,7 +574,7 @@ public class GameManager : Singleton<GameManager>
         {
             // if (value is bool)
             // {
-                SetPaused( value );
+            SetPaused(value);
             // }
         }
     }

@@ -7,13 +7,13 @@ using UnityEngine.UI;
 
 using System.Linq;  // to concat lists
 
-public class EnemyAIScript : MonoBehaviour
+public class EnemyAIScript : MonoBehaviour, IDamageable
 {
     public AudioClip hitMeClip;
     public AudioClip attackGrowl;
     public AudioClip attackClip;
     public Canvas floatingTextCanvasPrefab;
-    
+
     private Animator _myAnimator;
     private AudioSource _hitMeSound;
     // public bool chasingPlayer = false;
@@ -36,7 +36,7 @@ public class EnemyAIScript : MonoBehaviour
     private float _checkObstaclesTimer;
     private float _checkObstaclesFrequency = 2.0F;
     private float _lastCollidedPlayerTime = 0f;
-    
+
     private AudioSource _attackSound;
     private AudioSource _attackGrowl;
     private float _bornTime;
@@ -51,7 +51,8 @@ public class EnemyAIScript : MonoBehaviour
     void Start()
     {
         _myAnimator = GetComponent<Animator>();
-        if(_myAnimator != null) {
+        if (_myAnimator != null)
+        {
             // Play Walk Animation
             _myAnimator.SetTrigger("Walk");
             AnimatorStateInfo state = _myAnimator.GetCurrentAnimatorStateInfo(0);
@@ -59,30 +60,34 @@ public class EnemyAIScript : MonoBehaviour
             _myAnimator.Play("Base Layer.Walking", -1, UnityEngine.Random.Range(0f, 1f));
             SetAnimationSpeed();
         }
-        if(transform.name.Contains("Green") ){
+        if (transform.name.Contains("Green"))
+        {
             _moveForceWander = 1f;
             _moveForceChase = 2.5f;
             _attackPoints = 3;
         }
         _moveForce = _moveForceWander;
- 
+
         _player = GameObject.Find("Player");
         _changeDirectionTimer = _myMoveDuration + UnityEngine.Random.Range(0, _myMoveDuration);
         _checkObstaclesTimer = _checkObstaclesFrequency;
         _rb = GetComponent<Rigidbody>();
         _moveDir = transform.forward;
-        Turn(_moveDir,true);
-        
-        if(attackClip != null) {
+        Turn(_moveDir, true);
+
+        if (attackClip != null)
+        {
             _attackSound = gameObject.AddComponent<AudioSource>();
             _attackSound.clip = attackClip;
             _attackSound.volume = 0.55f;
         }
-        if(hitMeClip != null ) {
+        if (hitMeClip != null)
+        {
             _hitMeSound = gameObject.AddComponent<AudioSource>();
             _hitMeSound.clip = hitMeClip;
         }
-        if(attackGrowl != null ) {
+        if (attackGrowl != null)
+        {
             _attackGrowl = gameObject.AddComponent<AudioSource>();
             _attackGrowl.clip = attackGrowl;
             _attackGrowl.volume = 0.7f;
@@ -113,22 +118,30 @@ public class EnemyAIScript : MonoBehaviour
             StopChase();
             // Close enough to Player to chase Player?
             float playerDist = Vector3.Distance(_player.transform.position, transform.position);
-            if( playerDist < _chaseDist){
+            if (playerDist < _chaseDist)
+            {
                 ChasePlayer();
-            } else {
+            }
+            else
+            {
                 CheckChaseChain();
             }
-            if(HasTarget()){
+            if (HasTarget())
+            {
                 Debug.DrawLine(transform.position, _chaseTarget.transform.position, Color.green, 2);
                 FaceTarget();
-            }else{
+            }
+            else
+            {
                 ChangeDirection();
             }
             _changeDirectionTimer = HasTarget() ? _chasePlayerDuration : _myMoveDuration;
             SetAnimationSpeed();
-        } else if (_checkObstaclesTimer <= 0)
+        }
+        else if (_checkObstaclesTimer <= 0)
         {
-            if(CheckObstacles()){
+            if (CheckObstacles())
+            {
                 ChangeDirection(true);
             }
             _checkObstaclesTimer = _checkObstaclesFrequency;
@@ -155,7 +168,8 @@ public class EnemyAIScript : MonoBehaviour
 
     void SetAnimationSpeed()
     {
-        if(_myAnimator == null){
+        if (_myAnimator == null)
+        {
             return;
         }
         // For now, it just happens that _moveForceChase propels zombie at speed that syncs with Walk animation played full speed
@@ -163,20 +177,25 @@ public class EnemyAIScript : MonoBehaviour
         _myAnimator.speed = animationSpeed;
     }
 
-    public void ApplyDamage(int damage) {
-        // Debug.Log("ApplyDamage("+damage+")");
-        if (_HP <= 0 ) {
-            // Debug.Log("EnemyAIScript.ApplyDamage() _HP == > "+_HP);
+    public void TakeDamage(int damage)
+    {
+        // Debug.Log("TakeDamage("+damage+")");
+        if (_HP <= 0)
+        {
+            // Debug.Log("EnemyAIScript.TakeDamage() _HP == > "+_HP);
             return;
         }
         if (floatingTextCanvasPrefab != null)
-                ShowFloatingText(Mathf.Clamp(damage,0,_HP).ToString());
+            ShowFloatingText(Mathf.Clamp(damage, 0, _HP).ToString());
         _HP -= damage;
-        
+
         // GameObject[] children = new GameObject[0];
-        if (_HP <= 0){
+        if (_HP <= 0)
+        {
             Die();
-        } else {
+        }
+        else
+        {
             float distToPlayer = Vector3.Distance(_player.transform.position, transform.position);
             float maxDist = 30f;
             float pct = (maxDist - distToPlayer) / maxDist;
@@ -185,20 +204,23 @@ public class EnemyAIScript : MonoBehaviour
             _hitMeSound.Play();
             // Display floating text animation
         }
-        
+
         // return children;
     }
 
-    public void Die(){
-        Debug.Log("EnemyAI.Die()");
+    public void Die()
+    {
+        // Debug.Log("EnemyAI.Die()");
         GameObject swappedMummy = gameObject.GetComponent<SwapMummyScript>().Swap();
-        Debug.Log("EnemyAI.Die swappedMummy ==> "+swappedMummy.name);
+        // Debug.Log("EnemyAI.Die swappedMummy ==> "+swappedMummy.name);
         Rigidbody[] RBs = swappedMummy.GetComponentsInChildren<Rigidbody>();
         // List<GameObject> listOfGOs = new List<GameObject>();
-        foreach ( Rigidbody rb in RBs ){
+        foreach (Rigidbody rb in RBs)
+        {
             // listOfGOs.Add(rb.gameObject);
 
-            if(rb.name.Contains("Torso") && UnityEngine.Random.Range(0, 4) == 0){
+            if (rb.name.Contains("Torso") && UnityEngine.Random.Range(0, 4) == 0)
+            {
                 // Break apart Torso
                 rb.GetComponent<SubdivideObjectScript>().SubdivideMe();
 
@@ -209,16 +231,17 @@ public class EnemyAIScript : MonoBehaviour
             }
         }
         GameManager.Instance.Score += (int)_maxHP;
-        
+
         // return listOfGOs.ToArray();
         // GameObject[] arrayOfGameObjects = listOfGameObjects.ToArray();
     }
 
-    private void OnCollisionEnter (Collision collision) {
+    private void OnCollisionEnter(Collision collision)
+    {
 
-        
+
         // Vector3.Dot(Vector3 lhs, Vector3 rhs);
-        
+
         // Vector3 collisionForce = collision.impulse / Time.fixedDeltaTime;
         // collisionForce.y *= 0.25f; // Allow to sustain greater y-impact
 
@@ -231,7 +254,7 @@ public class EnemyAIScript : MonoBehaviour
 
         Vector3 myCollisionNormal = collision.contacts[0].normal;
 
-        float impact = Vector3.Dot(myCollisionNormal, collision.relativeVelocity);// * otherMass;
+        float impact = Vector3.Dot(myCollisionNormal, collision.relativeVelocity) * otherMass;
 
         /*
         float massDiff = otherMass / GetComponent<Rigidbody>().mass;
@@ -244,17 +267,18 @@ public class EnemyAIScript : MonoBehaviour
             Debug.Log("EnemyAI collision Impact ==> "+impact);
         }
         */
-        
+
         // if (collisionForce.magnitude > 200.0F ) {
-            
-        if (impact > 5){
+
+        if (impact > 5)
+        {
             // Debug.Log("Enemy Collision, Impact :: "+impact);
             // int damage = Mathf.RoundToInt( collisionForce.magnitude / 25 );
 
-            int damage = Mathf.RoundToInt( impact / 2 );
+            int damage = Mathf.RoundToInt(impact / 2);
 
             // Debug.Log("EnemyAI.CollisionDamage("+damage+")");
-            ApplyDamage(damage);
+            TakeDamage(damage);
             /*
             GameObject[] children = gameObject.GetComponent<SwapMummyScript>().Swap();
             // Debug.Log("children.Length: "+children.Length);
@@ -278,10 +302,13 @@ public class EnemyAIScript : MonoBehaviour
                 }
             }
             */
-    
-        } else {
+
+        }
+        else
+        {
             // Bumped into Something, Change Direction?
-            if(CheckObstacles()){
+            if (CheckObstacles())
+            {
                 ChangeDirection(true);
             }
         }
@@ -302,15 +329,16 @@ public class EnemyAIScript : MonoBehaviour
     {
         float attackDelta = Time.time - _lastCollidedPlayerTime;
         //Check for a match with the specified name on any GameObject that collides with your GameObject
-        
+
         if (transform.name.Contains("Mummy") && collision.gameObject == _player && attackDelta >= 1.6)
         {
             Vector3 targetDir = _player.transform.position - transform.position;
             float attackAngle = Mathf.Abs(Vector3.Angle(targetDir, transform.forward));
-            if(attackAngle < 45){
+            if (attackAngle < 45)
+            {
                 // Attack Player
                 Attack(collision.gameObject);
-                
+
                 ChasePlayer();
                 _lastCollidedPlayerTime = Time.time;
             }
@@ -320,33 +348,37 @@ public class EnemyAIScript : MonoBehaviour
     private void Attack(GameObject target)
     {
         // Attack
-        GameManager.Instance.DelayFunction( () =>
-        {
-            if(_attackSound != null)
-                _attackSound.Play();
-            target.GetComponent<HPScript>().TakeDamage(_attackPoints);
+        GameManager.Instance.DelayFunction(() =>
+       {
+           if (_attackSound != null)
+               _attackSound.Play();
+           target.GetComponent<HPScript>().TakeDamage(_attackPoints);
 
-        }, 0.25f);
-        
-        if(_attackGrowl != null)
+       }, 0.25f);
+
+        if (_attackGrowl != null)
             _attackGrowl.Play();
-        if(_myAnimator != null)
-            _myAnimator.SetTrigger("Attack"); 
+        if (_myAnimator != null)
+            _myAnimator.SetTrigger("Attack");
 
         _chaseTarget = target;
         FaceTarget();
     }
 
-    private void OnCollisionExit(Collision other) {
-        if(_myAnimator != null)
+    private void OnCollisionExit(Collision other)
+    {
+        if (_myAnimator != null)
             _myAnimator.SetTrigger("Walk");
     }
 
-    void FaceTarget(){
-        if(Time.time - _bornTime < 9){
+    void FaceTarget()
+    {
+        if (Time.time - _bornTime < 9)
+        {
             return;
         }
-        if(!HasTarget()){
+        if (!HasTarget())
+        {
             return;
         }
         // Find the vector pointing from our position to the target
@@ -357,8 +389,10 @@ public class EnemyAIScript : MonoBehaviour
         // transform.rotation = Quaternion.LookRotation( new Vector3(_moveDir.x, 0, _moveDir.z), Vector3.up );
     }
 
-    public void FaceOther( GameObject other ){
-        if(Time.time - _bornTime < 9){
+    public void FaceOther(GameObject other)
+    {
+        if (Time.time - _bornTime < 9)
+        {
             return;
         }
         StopChase();
@@ -370,7 +404,7 @@ public class EnemyAIScript : MonoBehaviour
         Turn(_moveDir);
     }
 
-    void ChangeDirection( bool forceChange = false )
+    void ChangeDirection(bool forceChange = false)
     {
         // Turn to new random direction
         _moveForce = _moveForceWander;
@@ -378,72 +412,85 @@ public class EnemyAIScript : MonoBehaviour
         // if( aboutFace){
         //     newDir = transform.forward;
         // } else {
-            int startRange = forceChange ? 1 : 0;
-            int i = UnityEngine.Random.Range(startRange, 3);
-            
-            if (i == 0)
-            {
-                newDir = transform.forward;
-            }
-            else if (i == 1)
-            {
-                newDir = transform.right;
-            }
-            else if (i == 2)
-            {
-                newDir = -transform.right;
-            }
+        int startRange = forceChange ? 1 : 0;
+        int i = UnityEngine.Random.Range(startRange, 3);
+
+        if (i == 0)
+        {
+            newDir = transform.forward;
+        }
+        else if (i == 1)
+        {
+            newDir = transform.right;
+        }
+        else if (i == 2)
+        {
+            newDir = -transform.right;
+        }
         // }
-        
+
         _moveDir = newDir;
         Turn(_moveDir);
         //transform.rotation = Quaternion.LookRotation( new Vector3(_moveDir.x, 0, _moveDir.z), Vector3.up );
     }
-    public void ChasePlayer(){
+    public void ChasePlayer()
+    {
         _moveForce = _moveForceChase;
         _chaseTarget = _player;
         FaceTarget();
     }
-    public void ChaseOther(GameObject other){
+    public void ChaseOther(GameObject other)
+    {
         _chaseTarget = other;
         // Debug.Log("ChaseOther:: "+other);
         FaceOther(other);
     }
-    public void StopChasePlayer(){
+    public void StopChasePlayer()
+    {
         _chaseTarget = null;
         _moveForce = _moveForceWander;
     }
-    public void StopChase(){
+    public void StopChase()
+    {
         _moveForce = _moveForceWander;
         _chaseTarget = null;
     }
-    public bool HasTarget(){
+    public bool HasTarget()
+    {
         return _chaseTarget != null;
     }
-    public GameObject GetTarget(){
+    public GameObject GetTarget()
+    {
         return _chaseTarget;
     }
-    public float TargetDistance(){
-        if(HasTarget()){
+    public float TargetDistance()
+    {
+        if (HasTarget())
+        {
             return Vector3.Distance(_chaseTarget.transform.position, transform.position);
         }
         return Mathf.Infinity;
     }
-    void CheckChaseChain(){
+    void CheckChaseChain()
+    {
         // Close enough to chase another Mummy who is chasing Player?
         // See if I can follow another enemy that leads to player...
         int minSteps = int.MaxValue;
         Collider[] colliders = Physics.OverlapSphere(transform.position, _chaseDist);
-        for (int i = 0; i < colliders.Length; i++) 
+        for (int i = 0; i < colliders.Length; i++)
         {
             GameObject nextGO = colliders[i].gameObject;
-            if(nextGO == _player){
+            if (nextGO == _player)
+            {
                 ChasePlayer();
                 break;
-            } else if(nextGO != gameObject && nextGO.name.Contains("Mummy") && !nextGO.name.Contains("Separated") && nextGO.GetComponent<EnemyAIScript>().HasTarget()){
+            }
+            else if (nextGO != gameObject && nextGO.name.Contains("Mummy") && !nextGO.name.Contains("Separated") && nextGO.GetComponent<EnemyAIScript>().HasTarget())
+            {
 
                 int steps = nextGO.GetComponent<EnemyAIScript>().StepsToPlayer();
-                if ( steps < minSteps ){
+                if (steps < minSteps)
+                {
                     // Make that our target
                     ChaseOther(nextGO);
                     minSteps = steps;
@@ -451,32 +498,42 @@ public class EnemyAIScript : MonoBehaviour
             }
         }
     }
-    public int StepsToPlayer(){
+    public int StepsToPlayer()
+    {
         // Returns # of links in the chaseTarget chain leading to Player
-        if(!HasTarget()){
+        if (!HasTarget())
+        {
             return int.MaxValue;
-        }else{
-            if( _chaseTarget == _player ){
+        }
+        else
+        {
+            if (_chaseTarget == _player)
+            {
                 return 0;
             }
             int links = 0;
             GameObject nextTarget = _chaseTarget;
             GameObject go = GameObject.Find("wibble");
-            if (!nextTarget) {
+            if (!nextTarget)
+            {
                 // Debug.Log("No game object called _chaseTarget: "+_chaseTarget);
                 _chaseTarget = null;
                 return int.MaxValue;
             }
-            while(nextTarget != null && nextTarget.GetComponent<EnemyAIScript>().HasTarget()){
+            while (nextTarget != null && nextTarget.GetComponent<EnemyAIScript>().HasTarget())
+            {
                 // Debug.Log("links: "+links);
-                Debug.Log("in loop, prev nextTarget: "+nextTarget);
+                // Debug.Log("in loop, prev nextTarget: "+nextTarget);
                 nextTarget = nextTarget.GetComponent<EnemyAIScript>().GetTarget();
                 // Debug.Log("in loop, next nextTarget: "+nextTarget);
-                links ++;
-                if(nextTarget == _player){
+                links++;
+                if (nextTarget == _player)
+                {
                     // Debug.Log("Found Player in ["+links+"] links");
                     return links;
-                }else if(nextTarget == null){
+                }
+                else if (nextTarget == null)
+                {
                     StopChase();
                     return int.MaxValue;
                 }
@@ -489,11 +546,12 @@ public class EnemyAIScript : MonoBehaviour
     private bool CheckObstacles()
     {
         RaycastHit hit;
-        Vector3 lowOrigin = new Vector3(transform.position.x,transform.position.y-1,transform.position.z);
+        Vector3 lowOrigin = new Vector3(transform.position.x, transform.position.y - 1, transform.position.z);
         if (Physics.Raycast(lowOrigin, transform.forward, out hit))
         {
-           
-            if (hit.rigidbody != null && !(hit.rigidbody.constraints == RigidbodyConstraints.FreezePositionX | hit.rigidbody.constraints == RigidbodyConstraints.FreezePositionZ)) {
+
+            if (hit.rigidbody != null && !(hit.rigidbody.constraints == RigidbodyConstraints.FreezePositionX | hit.rigidbody.constraints == RigidbodyConstraints.FreezePositionZ))
+            {
                 // Not locked on X or Z movement
                 //  Debug.Log("Constraints: "+ hit.rigidbody.constraints);
                 // Object can be moved
@@ -512,7 +570,7 @@ public class EnemyAIScript : MonoBehaviour
                 return false;
             }
         }
-    
+
         return false;
     }
     void Turn(Vector3 targetRot, bool immediately = false)
@@ -537,72 +595,74 @@ public class EnemyAIScript : MonoBehaviour
 
     IEnumerator TurnCoroutine(Vector3 targetRot)
     {
-        
-            // Debug.Log("TurnCoroutine: " + transform.rotation);
-            // Debug.Log("TargetRot: " + Quaternion.Euler(targetRot));
-            // Debug.Log("yROt: " + transform.rotation.y);
 
-            float duration = 1f;
-            float counter = 0;
-            Vector3 startRot = transform.rotation.eulerAngles;
-            float startYrot = startRot.y;
-            float targetYrot = Quaternion.LookRotation(targetRot, Vector3.up).eulerAngles.y;
+        // Debug.Log("TurnCoroutine: " + transform.rotation);
+        // Debug.Log("TargetRot: " + Quaternion.Euler(targetRot));
+        // Debug.Log("yROt: " + transform.rotation.y);
 
-            // Constrain -180 to 180
-            float a = targetYrot - startYrot;
-            // a = (a + 180) % 360 - 180;
-            a = Mod((a+180),360) - 180;
-            targetYrot = startYrot + a;
+        float duration = 1f;
+        float counter = 0;
+        Vector3 startRot = transform.rotation.eulerAngles;
+        float startYrot = startRot.y;
+        float targetYrot = Quaternion.LookRotation(targetRot, Vector3.up).eulerAngles.y;
 
-            float currentYrot = startYrot;
-            // if(Mathf.Abs(targetYrot - startYrot) > 180f ){
+        // Constrain -180 to 180
+        float a = targetYrot - startYrot;
+        // a = (a + 180) % 360 - 180;
+        a = Mod((a + 180), 360) - 180;
+        targetYrot = startYrot + a;
 
-            //     Debug.Log("startYrot:  " + startYrot);
-            //     Debug.Log("targetYrot:  " + targetYrot);
-            //     Debug.Log(" DIFF:  "+(targetYrot - startYrot));
+        float currentYrot = startYrot;
+        // if(Mathf.Abs(targetYrot - startYrot) > 180f ){
+
+        //     Debug.Log("startYrot:  " + startYrot);
+        //     Debug.Log("targetYrot:  " + targetYrot);
+        //     Debug.Log(" DIFF:  "+(targetYrot - startYrot));
+        // }
+
+
+        while (counter < duration)
+        {
+            counter += Time.deltaTime;
+            currentYrot = Mathf.Lerp(startYrot, targetYrot, counter / duration);
+
+            // if(Mathf.Abs(targetYrot - startYrot) > 180 ){
+            // Debug.Log(" -- counter / duration:: " + (counter / duration));
+            // Debug.Log("currentYrot:: " + currentYrot);
             // }
-           
 
-            while (counter < duration)
-            {
-                counter += Time.deltaTime;
-                currentYrot = Mathf.Lerp(startYrot, targetYrot, counter / duration);
+            transform.rotation = Quaternion.Euler(transform.eulerAngles.x, currentYrot, transform.eulerAngles.z);
 
-                // if(Mathf.Abs(targetYrot - startYrot) > 180 ){
-                    // Debug.Log(" -- counter / duration:: " + (counter / duration));
-                    // Debug.Log("currentYrot:: " + currentYrot);
-                // }
 
-                transform.rotation = Quaternion.Euler(transform.eulerAngles.x, currentYrot, transform.eulerAngles.z);
-                
-                
-                Debug.DrawRay(transform.position, targetRot * 5f, Color.yellow, 0.2f);
-                Debug.DrawRay(transform.position, transform.forward * 5f, Color.red, 0.1f);
+            Debug.DrawRay(transform.position, targetRot * 5f, Color.yellow, 0.2f);
+            Debug.DrawRay(transform.position, transform.forward * 5f, Color.red, 0.1f);
 
-                yield return null;
-            }
+            yield return null;
+        }
 
-            // Debug.Log(" ---------- End TurnCoroutine, rotation: " + transform.rotation);
-            // Debug.Log("yROt: " + transform.rotation.y);
-            // Debug.Log("targetYrot: " + targetYrot);
+        // Debug.Log(" ---------- End TurnCoroutine, rotation: " + transform.rotation);
+        // Debug.Log("yROt: " + transform.rotation.y);
+        // Debug.Log("targetYrot: " + targetYrot);
 
-        
+
     }
-    private float Mod (float a, float n) {
+    private float Mod(float a, float n)
+    {
         // Modulus that accepts negatives, used by Turn CoRoutine
         // Learn to create and  call static class functions!
-        return a - Mathf.Floor((a/n)) * n;
+        return a - Mathf.Floor((a / n)) * n;
     }
-    void ShowFloatingText(string text){
-        
+    void ShowFloatingText(string text)
+    {
+
         Canvas floatingCanvas = Instantiate(floatingTextCanvasPrefab, new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z), Quaternion.identity);
         floatingCanvas.enabled = true;
-        
+
         // Face Camera
         Vector3 v = Camera.main.transform.position - floatingCanvas.transform.position;
         v.x = v.z = 0.0f;
-        floatingCanvas.transform.LookAt( Camera.main.transform.position - v );
-        floatingCanvas.transform.rotation =(Camera.main.transform.rotation); // Take care about camera rotation
+        floatingCanvas.transform.LookAt(Camera.main.transform.position - v);
+        floatingCanvas.transform.rotation = (Camera.main.transform.rotation); // Take care about camera rotation
 
         Text floatingText = floatingCanvas.transform.Find("FloatingText").GetComponent<Text>();
         floatingText.text = text;

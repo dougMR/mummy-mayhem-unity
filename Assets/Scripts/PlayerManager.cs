@@ -25,33 +25,33 @@ public class PlayerManager : Singleton<PlayerManager>
     public static int AK47_INDEX = 4;
     private Weapon[] _weapons = new Weapon[5];
 
-    public AudioClip clubWhooshClip; // <- redundant with FireWeaponScript.cs
-    private AudioSource _clubWhooshSound; // <- redundant with FireWeaponScript.cs
+    // public AudioClip clubWhooshClip; // <- redundant with FireWeaponScript.cs
+    // private AudioSource _clubWhooshSound; // <- redundant with FireWeaponScript.cs
 
-    public Image grenadeReloadImage;
-    public Image rpgReloadImage;
-    public Image pistolReloadImage;
-    public AudioClip pistolReloadClip;
-    public AudioClip grenadeReloadClip;
-    public AudioClip rpgReloadClip;
-    private AudioSource _rpgReloadSound;
-    private AudioSource _pistolReloadSound;
+    // public Image grenadeReloadImage;
+    // public Image rpgReloadImage;
+    // public Image pistolReloadImage;
+    // public AudioClip pistolReloadClip;
+    // public AudioClip grenadeReloadClip;
+    // public AudioClip rpgReloadClip;
+    // private AudioSource _rpgReloadSound;
+    // private AudioSource _pistolReloadSound;
     private Coroutine reloadCo;
-    private AudioSource _grenadeReloadSound;
+    // private AudioSource _grenadeReloadSound;
 
     public AudioClip ammoFullClip;
     private AudioSource _ammoFullSound;
 
     private int _currentWeaponIndex = 0;
-    
+
     private GameObject _clubGO;
     private GameObject _grenadeGunGO;
     private GameObject _rocketLauncherGO;
     private GameObject _pistolGO;
     private GameObject _AK47GO;
     private AudioSource _playerAudioSource;
-    
-    
+
+
     // Start is called before the first frame update
     protected override void Awake()
     {
@@ -68,47 +68,50 @@ public class PlayerManager : Singleton<PlayerManager>
         _AK47GO.SetActive(false);
         CurrentWeapon = null;
         InitWeapons();
-        
+
     }
 
     void Start()
     {
 
         _playerAudioSource = gameObject.AddComponent<AudioSource>();
-
+        /*
         Color c = grenadeReloadImage.color;
         c.a = 0;
         grenadeReloadImage.color = c;
         rpgReloadImage.color = c;
         pistolReloadImage.color = c;
-        
-        if (clubWhooshClip != null)
-        {
-            _clubWhooshSound = gameObject.AddComponent<AudioSource>();
-            _clubWhooshSound.clip = clubWhooshClip;
-        }
+        */
 
-        if (grenadeReloadClip != null)
-        {
-            _grenadeReloadSound = gameObject.AddComponent<AudioSource>();
-            _grenadeReloadSound.clip = grenadeReloadClip;
-        }
-        if (pistolReloadClip != null)
-        {
-            _pistolReloadSound = gameObject.AddComponent<AudioSource>();
-            _pistolReloadSound.clip = pistolReloadClip;
-        }
-        if (rpgReloadClip != null)
-        {
-            _rpgReloadSound = gameObject.AddComponent<AudioSource>();
-            _rpgReloadSound.clip = rpgReloadClip;
-        }
+        /*
+                if (clubWhooshClip != null)
+                {
+                    _clubWhooshSound = gameObject.AddComponent<AudioSource>();
+                    _clubWhooshSound.clip = clubWhooshClip;
+                }
+                if (grenadeReloadClip != null)
+                {
+                    _grenadeReloadSound = gameObject.AddComponent<AudioSource>();
+                    _grenadeReloadSound.clip = grenadeReloadClip;
+                }
+                if (pistolReloadClip != null)
+                {
+                    _pistolReloadSound = gameObject.AddComponent<AudioSource>();
+                    _pistolReloadSound.clip = pistolReloadClip;
+                }
+                if (rpgReloadClip != null)
+                {
+                    _rpgReloadSound = gameObject.AddComponent<AudioSource>();
+                    _rpgReloadSound.clip = rpgReloadClip;
+                }
+                */
         if (ammoFullClip != null)
         {
             _ammoFullSound = gameObject.AddComponent<AudioSource>();
             _ammoFullSound.clip = ammoFullClip;
             _ammoFullSound.volume = 0.5f;
         }
+
     }
 
 
@@ -119,18 +122,20 @@ public class PlayerManager : Singleton<PlayerManager>
 
         _weapons[GRENADE_INDEX] = new Weapon("Grenade Launcher", _grenadeGunGO, GRENADE_INDEX, 50, 100, "Images/GrenadeGun_sprite", "Images/ammoBox_sprite", "Sounds/single-nerf-shot", "Sounds/grenade-reload", "Sounds/metalic_click");
 
-        _weapons[ROCKET_INDEX] = new Weapon("Rocket Launcher", _rocketLauncherGO, ROCKET_INDEX, 20, 50, "Images/Rocket_sprite", "Images/rocketAmmo_sprite", "Sounds/rocket-shoot-002", "rocket-reload", "Sounds/metalic_click");
+        _weapons[ROCKET_INDEX] = new Weapon("Rocket Launcher", _rocketLauncherGO, ROCKET_INDEX, 20, 50, "Images/Rocket_sprite", "Images/rocketAmmo_sprite", "Sounds/rocket-shoot-002", "Sounds/rocket-reload", "Sounds/metalic_click");
 
-        _weapons[PISTOL_INDEX] = new Weapon("Pistol", _pistolGO, PISTOL_INDEX, 50, 50, "Images/Pistol_sprite", "Images/pistolAmmo_sprite", "Sounds/gunshot", "Sounds/grenade-reload", "Sounds/metalic_click", 0.7f );
+        _weapons[PISTOL_INDEX] = new Weapon("Pistol", _pistolGO, PISTOL_INDEX, 50, 50, "Images/Pistol_sprite", "Images/pistolAmmo_sprite", "Sounds/gunshot", "Sounds/grenade-reload", "Sounds/metalic_click", 0.7f);
 
-        _weapons[AK47_INDEX] = new Weapon("AK47", _AK47GO, AK47_INDEX, 50, 100, "Images/AK47_sprite", "Images/AKAmmo_sprite", "Sounds/gunshot", "Sounds/grenade-reload", "Sounds/metalic_click", 0.1f );
+        _weapons[AK47_INDEX] = new Weapon("AK47", _AK47GO, AK47_INDEX, 50, 100, "Images/AK47_sprite", "Images/AKAmmo_sprite", "Sounds/gunshot", "Sounds/grenade-reload", "Sounds/metalic_click", 0.1f);
 
-        foreach(Weapon weapon in _weapons){
+        foreach (Weapon weapon in _weapons)
+        {
             weapon.Equipped = false;
-        }        
+        }
     }
 
-    private void Update(){
+    private void Update()
+    {
         if (Input.GetKeyUp(KeyCode.C))
         {
             // Cycle Through Weapons
@@ -138,19 +143,21 @@ public class PlayerManager : Singleton<PlayerManager>
         }
     }
 
-    private void CycleWeapons(){
+    private void CycleWeapons()
+    {
         // Cycle through to next available weapon
         int index = _currentWeaponIndex;
         int tries = 0;
         do
         {
-            index = (index+1) % _weapons.Length;
-            tries ++;
-            if(_weapons[index].Equipped){
+            index = (index + 1) % _weapons.Length;
+            tries++;
+            if (_weapons[index].Equipped && _weapons[index].Ammo > 0)
+            {
                 WeaponIndex = index;
                 break;
             }
-        }while(!_weapons[index].Equipped && tries < _weapons.Length);
+        } while ((!_weapons[index].Equipped || _weapons[index].Ammo <= 0) && tries < _weapons.Length);
     }
 
     // void OnGUI(){
@@ -167,34 +174,41 @@ public class PlayerManager : Singleton<PlayerManager>
     //     }
     // }
 
-    public Weapon GetWeaponByName( string weaponName) {
-        foreach( Weapon weapon in _weapons){
-            if(weapon.Name == weaponName){
+    public Weapon GetWeaponByName(string weaponName)
+    {
+        foreach (Weapon weapon in _weapons)
+        {
+            if (weapon.Name == weaponName)
+            {
                 return weapon;
             }
         }
         return null;
     }
-    public bool AddWeaponByName( string weaponName ){
+    public bool AddWeaponByName(string weaponName)
+    {
 
-        return AddWeaponByIndex( GetWeaponByName(weaponName).Index );
+        return AddWeaponByIndex(GetWeaponByName(weaponName).Index);
     }
-    public bool AddWeaponByIndex( int weaponInex ){
+    public bool AddWeaponByIndex(int weaponInex)
+    {
         // return true if we were able to equip weapon or add ammo
         Weapon weapon = _weapons[weaponInex];
         // Check if Player already has this weapon
 
-        if ( !weapon.Equipped ){
+        if (!weapon.Equipped)
+        {
             // Add new weapon type to Player's inventory
 
-            GameManager.Instance.ShowSprite( weapon.MySprite );
+            GameManager.Instance.ShowSprite(weapon.MySprite);
             Audio.PlayOneShot(weapon.LoadClip);
 
             weapon.Equipped = true;
             int equippedWeaponCount = 0;
-            foreach (Weapon w in _weapons){
-                if(w.Equipped)
-                    equippedWeaponCount ++;
+            foreach (Weapon w in _weapons)
+            {
+                if (w.Equipped)
+                    equippedWeaponCount++;
             }
             string use;
             switch (weaponInex)
@@ -207,7 +221,7 @@ public class PlayerManager : Singleton<PlayerManager>
                     break;
                 case 2:
                 case 3:
-                case 4: 
+                case 4:
                     use = "fire";
                     break;
                 default:
@@ -216,33 +230,40 @@ public class PlayerManager : Singleton<PlayerManager>
             }
             // Wait a pause, then show message
             float delay = 0.4f;
-            if(equippedWeaponCount == 1) {
+            if (equippedWeaponCount == 1)
+            {
                 CurrentWeapon = weapon;
-                GameManager.Instance.ShowMessage("You Got the "+weapon.Name+"!");
-                GameManager.Instance.ShowMessage("'G' or Left Mouse Btn to "+use+".");
-            } else {
-                GameManager.Instance.ShowMessage("You Got the "+weapon.Name+"!");
-                GameManager.Instance.ShowMessage("'C' to change weapons,\n\r'G' or Left Mouse Btn to "+use+".");
+                GameManager.Instance.ShowMessage("You Got the " + weapon.Name + "!");
+                // GameManager.Instance.ShowMessage("'G' or Left Mouse Btn to " + use + ".");
+            }
+            else
+            {
+                GameManager.Instance.ShowMessage("You Got the " + weapon.Name + "!");
+                // GameManager.Instance.ShowMessage("'C' to change weapons,\n\r'G' or Left Mouse Btn to " + use + ".");
             }
             return true;
-        } else {
+        }
+        else
+        {
             // Weapon already equipped. Add ammo for that weapon
             return ReloadWeapon(weapon.Name, 10);
         }
     }
 
-    public void PlayAmmoFullSound(){
-        if(_ammoFullSound) _ammoFullSound.Play();
+    public void PlayAmmoFullSound()
+    {
+        if (_ammoFullSound) _ammoFullSound.Play();
     }
 
-    public bool ReloadWeapon(string weaponName, int amount = 5 )
+    public bool ReloadWeapon(string weaponName, int amount = 5)
     {
-        if(weaponName == "") weaponName = PlayerManager.Instance.CurrentWeapon.Name;
+        if (weaponName == "") weaponName = PlayerManager.Instance.CurrentWeapon.Name;
         bool addedAmmo = PlayerManager.Instance.GetWeaponByName(weaponName).AddAmmo(amount);
-        if( !addedAmmo ) {
+        if (!addedAmmo)
+        {
             return false;
         }
-        
+
         /*
         Image reloadImage;
 
@@ -303,18 +324,23 @@ public class PlayerManager : Singleton<PlayerManager>
 
     //  GETTERS / SETTERS
 
-    public AudioSource Audio {
+    public AudioSource Audio
+    {
         get => _playerAudioSource;
     }
 
-    public Weapon CurrentWeapon {
-        get {
+    public Weapon CurrentWeapon
+    {
+        get
+        {
             return _weapons.Length > 0 ? _weapons[_currentWeaponIndex] : null;
         }
-        set {
+        set
+        {
             // Debug.Log(value);
-            if(value is Weapon && System.Array.IndexOf(_weapons, value) != -1){
-                GameManager.Instance.ShowSprite( value.MySprite );
+            if (value is Weapon && System.Array.IndexOf(_weapons, value) != -1)
+            {
+                GameManager.Instance.ShowSprite(value.MySprite);
                 _currentWeaponIndex = System.Array.IndexOf(_weapons, value);
                 foreach (Weapon w in _weapons)
                 {
@@ -325,12 +351,13 @@ public class PlayerManager : Singleton<PlayerManager>
         }
     }
 
-    public int WeaponIndex {
-        get 
+    public int WeaponIndex
+    {
+        get
         {
             return _currentWeaponIndex;
         }
-        private set 
+        private set
         {
             // Set Weapon by index
             value = value % _weapons.Length;
@@ -364,9 +391,9 @@ public class Weapon
     private AudioClip _fireClip;
     private AudioClip _emptyClip;
     private float _autoFireFrequency;
-    
 
-    public Weapon(string name, GameObject myGameObject, int index, int ammo, int maxAmmo, string spritePath, string ammoSpritePath, string fireClipPath, string loadClipPath, string emptyClipPath, float autoFireFrequency = 0f )
+
+    public Weapon(string name, GameObject myGameObject, int index, int ammo, int maxAmmo, string spritePath, string ammoSpritePath, string fireClipPath, string loadClipPath, string emptyClipPath, float autoFireFrequency = 0f)
     {
         // Debug.Log("New Weapon()");
         // Debug.Log("index: "+index);
@@ -375,7 +402,7 @@ public class Weapon
         _myGO = myGameObject; // The weapon's gameObject in Player gameObject
         _ammoCount = ammo;
         _maxAmmo = maxAmmo;
-        MySprite = Resources.Load <Sprite>(spritePath);
+        MySprite = Resources.Load<Sprite>(spritePath);
         AmmoSprite = Resources.Load<Sprite>(ammoSpritePath);
         FireClip = Resources.Load<AudioClip>(fireClipPath);
         LoadClip = Resources.Load<AudioClip>(loadClipPath);
@@ -383,29 +410,46 @@ public class Weapon
         AutoFrequency = autoFireFrequency;
     }
 
-    public bool AddAmmo( int amt ){ 
+    public bool AddAmmo(int amt)
+    {
         // !!! Needs Refactoring !!!
+        //
         // Debug.Log("Weapon("+Name+") AddAmmo("+amt+")");
         bool success = false;
-        if((amt > 0 && _ammoCount < _maxAmmo) || (amt < 0 && _ammoCount + amt >= 0)){
-            Ammo+= amt;
+        if ((amt > 0 && _ammoCount < _maxAmmo) || (amt < 0 && _ammoCount + amt >= 0))
+        {
+            // Not full and adding, or subtracting but not more than we have
+            Ammo += amt;
             success = true;
-        } else if( amt <= 0 ) {
-            if( _ammoCount > 0 ) {
+        }
+        else if (amt <= 0)
+        {
+            // Subtracting
+            if (_ammoCount > 0)
+            {
+                // We can subtract more than we have, but Ammo will bottom out at zero
                 Ammo += amt;
                 success = true;
-            } else {
+            }
+            else
+            {
+                // Ammo is too low to subtract from
                 GameManager.Instance.ShowMessage(Name + " is empty.");
                 success = false;
             }
-        } else {
-            if(PlayerManager.Instance.GetWeaponByName(Name).Equipped){
+        }
+        else
+        {
+            if (PlayerManager.Instance.GetWeaponByName(Name).Equipped)
+            {
                 GameManager.Instance.ShowMessage(Name + " is full.");
-            } else {
-                // Player doesn't have this weapon equipped
-                GameManager.Instance.ShowMessage("You're carrying max \n\r"+Name + " ammo.");
             }
-            
+            else
+            {
+                // Player doesn't have this weapon equipped
+                GameManager.Instance.ShowMessage("You're carrying max \n\r" + Name + " ammo.");
+            }
+
             PlayerManager.Instance.PlayAmmoFullSound();
             success = false;
         }
@@ -416,19 +460,22 @@ public class Weapon
 
     private void UpdateAmmoBar()
     {
-        if(PlayerManager.Instance.CurrentWeapon == this){
-            Debug.Log(PlayerManager.Instance.CurrentWeapon.Name + " == " + this.Name);
+        if (PlayerManager.Instance.CurrentWeapon == this)
+        {
+            // Debug.Log(PlayerManager.Instance.CurrentWeapon.Name + " == " + this.Name);
             float ratio = (float)Ammo / (float)MaxAmmo;
             _ammoBar.fillAmount = ratio;
         }
-        
+
     }
 
     public Sprite MySprite
     {
         get => _mySprite;
-        private set {
-            if(value is Sprite){
+        private set
+        {
+            if (value is Sprite)
+            {
                 _mySprite = value;
             }
         }
@@ -437,28 +484,35 @@ public class Weapon
     public Sprite AmmoSprite
     {
         get => _ammoSprite;
-        private set {
+        private set
+        {
             _ammoSprite = value;
         }
     }
 
-    public AudioClip FireClip{
+    public AudioClip FireClip
+    {
         get => _fireClip;
-        private set {
+        private set
+        {
             _fireClip = value;
         }
     }
 
-    public AudioClip LoadClip{
+    public AudioClip LoadClip
+    {
         get => _loadClip;
-        private set {
+        private set
+        {
             _loadClip = value;
         }
     }
 
-    public AudioClip EmptyClip{
+    public AudioClip EmptyClip
+    {
         get => _emptyClip;
-        private set {
+        private set
+        {
             _emptyClip = value;
         }
     }
@@ -466,7 +520,8 @@ public class Weapon
     public int Ammo
     {
         get => _ammoCount;
-        private set {
+        private set
+        {
             _ammoCount = Mathf.Clamp(value, 0, _maxAmmo);
         }
     }
@@ -474,7 +529,7 @@ public class Weapon
     {
         get => _maxAmmo;
     }
-    
+
     public string Name
     {
         get => _name;
@@ -483,14 +538,17 @@ public class Weapon
             if (value is string)
             {
                 _name = value;
-            } else {
+            }
+            else
+            {
                 _name = null;
             }
         }
     }
-    public int Index {
+    public int Index
+    {
         get => _index;
-        private set 
+        private set
         {
             _index = value;
         }
@@ -499,7 +557,7 @@ public class Weapon
     {
         // Player is using it
         get => _myGO.activeSelf;
-        set 
+        set
         {
             _myGO.SetActive(value);
         }
@@ -508,7 +566,7 @@ public class Weapon
     {
         // Player has it
         get => _equipped;
-        set 
+        set
         {
             _equipped = value;
         }
@@ -516,14 +574,16 @@ public class Weapon
     public float AutoFrequency
     {
         get => _autoFireFrequency;
-        set {
+        set
+        {
             _autoFireFrequency = value;
         }
     }
-    public GameObject MyGO 
+    public GameObject MyGO
     {
         get => _myGO;
-        set {
+        set
+        {
             _myGO = value;
         }
     }

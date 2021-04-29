@@ -16,10 +16,11 @@ public class WeaponPickupScript : MonoBehaviour
     }
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("WeaponPickupScript :: "+weaponName);
+        // Debug.Log("WeaponPickupScript : +  "+weaponName);
         if (other.name == "Player")
         {
-            if (  PlayerManager.Instance.AddWeaponByName(weaponName) ){
+            if (PlayerManager.Instance.AddWeaponByName(weaponName))
+            {
                 // Pick Up Weapon
                 // _pickupSound.Play();
                 // PlayerManager.Instance.Audio.PlayOneShot(PlayerManager.Instance.GetWeaponByName(weaponName).LoadClip);

@@ -11,7 +11,7 @@ public class RocketFlyScript : MonoBehaviour
     private float radius = 12;
     private float explodePower = 400;
     private float upwardsModifier = 1.0F;
-    private GameObject explosionParticleEffect;
+    // private GameObject explosionParticleEffect;
     private float _lifetime = 8.0f;
     // private bool detonated = false;
     // Start is called before the first frame update
@@ -51,6 +51,9 @@ public class RocketFlyScript : MonoBehaviour
 
     void Detonate()
     {
+
+        // CHange this to use GameManager.Instance.Explode
+
         // if (!detonated)
         // {
         // detonated = true;

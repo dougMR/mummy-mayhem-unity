@@ -19,7 +19,7 @@ public class GrenadeCollideScript : MonoBehaviour
         // explosionGO = Resources.Load("Explosion") as GameObject;
         _commotionScript = GetComponent<CauseCommotionScript>();
     }
-    
+
     /*
     void OnTriggerEnter(Collider other){
         Debug.Log("Grenade collided.");
@@ -38,30 +38,30 @@ public class GrenadeCollideScript : MonoBehaviour
         }
     }
     */
-    
-    
-    
+
+
+
     void OnCollisionEnter(Collision collision)
     {
-        
-        Debug.Log("Grenade collided.");
+
+        // Debug.Log("Grenade collided.");
         GameObject other = collision.gameObject;
-        
+
         if (!other.CompareTag("Player"))
         {
             // Debug.Log("Grenade Hit "+collision.collider.name);
             // GameManager.Instance.GamePaused = true;
-            
+
             // int numContacts = collision.contactCount;
             // ContactPoint cp = collision.GetContact(0);
             // transform.position = cp.point + cp.normal * 0.1f;
             Detonate();
         }
     }
-    
-    
-    
-    void Detonate()
+
+
+
+    private void Detonate()
     {
         if (!detonated)
         {
@@ -69,20 +69,22 @@ public class GrenadeCollideScript : MonoBehaviour
             // Debug.Log("Grenade.Detonate()");
 
             // Remove this object from interfering with explosion force
+            Destroy(gameObject);
+
             gameObject.GetComponent<Rigidbody>().collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
             gameObject.GetComponent<Rigidbody>().isKinematic = true;
 
-            GameManager.Instance.Explode( transform.position, radius, explodePower, explosionGO, "Enemies");
+            GameManager.Instance.Explode(transform.position, radius, explodePower, explosionGO, "Enemies");
 
             // Show 2nd explosion animation
             GameObject expl = (GameObject)Instantiate(explosionGO2, transform.position, Quaternion.identity);
 
-            Destroy(gameObject);
+
 
             // Cause A Commotion...
             _commotionScript.CauseCommotion(12f, 3f);
-            
+
         }
     }
 }
