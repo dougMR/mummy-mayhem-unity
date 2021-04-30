@@ -270,9 +270,9 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
 
         // if (collisionForce.magnitude > 200.0F ) {
 
-        if (impact > 5)
+        if (impact > 10)
         {
-            // Debug.Log("Enemy Collision, Impact :: "+impact);
+            // Debug.Log("EnemyAI Collision, Impact :: "+impact);
             // int damage = Mathf.RoundToInt( collisionForce.magnitude / 25 );
 
             int damage = Mathf.RoundToInt(impact / 2);

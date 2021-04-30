@@ -186,7 +186,7 @@ public class ZombieMove : MonoBehaviour
 
         if (impact > 5)
         {
-            Debug.Log("Enemy Collision, Impact :: " + impact);
+            Debug.Log("ZombieMove Collision, IMPACT ::: " + impact);
 
             int damage = Mathf.RoundToInt(impact / 2);
 

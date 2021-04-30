@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SubdivideObjectScript : MonoBehaviour
+public class SubdivideObjectScript : MonoBehaviour, IDamageable
 {
     public GameObject subdivisionCube; // 1x1x1 prefab
-    private Vector3 myDimensions = new Vector3(1f,1f,1f);
+    private Vector3 myDimensions = new Vector3(1f, 1f, 1f);
     private int numberOfSubdivisions = 4;
     private Vector3 subdivisionSize;
     private Color _myColor;
@@ -21,7 +21,11 @@ public class SubdivideObjectScript : MonoBehaviour
         _myColor = GetComponent<Renderer>().material.color;
     }
 
-
+    public void TakeDamage(int damage)
+    {
+        // any amount of damage causes subdivision
+        SubdivideMe();
+    }
     public List<GameObject> SubdivideMe()
     {
         // Debug.Log("     SubdivideMe()");
@@ -41,15 +45,17 @@ public class SubdivideObjectScript : MonoBehaviour
             {
                 for (int z = 0; z < numberOfSubdivisions; z++)
                 {
-                    if (Random.Range(0,4) == 0){
+                    if (Random.Range(0, 4) == 0)
+                    {
                         // Create subdivision at x,y,z coordinate
                         float xCoord = transform.position.x - myDimensions.x * 0.5f + subdivisionSize.x * x + subdivisionSize.x * 0.5f;
                         float yCoord = transform.position.y - myDimensions.y * 0.5f + subdivisionSize.y * y + subdivisionSize.y * 0.5f;
                         float zCoord = transform.position.z - myDimensions.z * 0.5f + subdivisionSize.z * z + subdivisionSize.z * 0.5f;
                         // Instantiate subdivision.
                         GameObject subdivision = Instantiate(subdivisionCube, new Vector3(xCoord, yCoord, zCoord), Quaternion.identity);
-                        Color color = Random.Range(0,4) == 0 ? _myColor * 0.85f : _myColor;
-                        if(Random.Range(0,2) == 0 ) {
+                        Color color = Random.Range(0, 4) == 0 ? _myColor * 0.85f : _myColor;
+                        if (Random.Range(0, 2) == 0)
+                        {
                             Renderer m_Renderer = subdivision.GetComponent<Renderer>();
                             m_Renderer.material.color = _myColor;
                         }

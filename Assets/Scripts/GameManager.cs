@@ -323,43 +323,49 @@ public class GameManager : Singleton<GameManager>
         // int layerInt = LayerMask.NameToLayer(maskLayerName); // -1 if not found
         // int layerMask = layerInt == -1 ? ~0 : 1 << layerInt; // ~ is bitwise NOT, so ~0 means All Layers
 
-        // int playerLayer = 1 << LayerMask.NameToLayer("Player");
+        int playerLayer = 1 << LayerMask.NameToLayer("Player");
         // layerMask = layerMask | playerLayer;
         int layerMask = ~0;
 
+
         // Check for Explosion hit Mummies
         Collider[] colliders = Physics.OverlapSphere(explosionPos, radius, layerMask);
-        List<Collider> usedColliders = new List<Collider>();
+        List<Collider> usedColliders = new List<Collider>(); // <-- for treating multiple GO colliders as single collider
+
         Debug.Log("GM.Explode #colliders ==> " + colliders.Length);
 
         for (int i = 0; i < colliders.Length; i++)
         {
             Collider coll = colliders[i];
-            /*
+
+            // Check against multiple colliders in same gameObject
             if (usedColliders.Contains(coll))
             {
                 // skip this collider
-                Debug.Log("Skip This Collider!!");
-                break;
+                Debug.Log("Skip This Collider!! -- " + coll.name);
+                continue;
             }
             usedColliders.AddRange(coll.GetComponentsInChildren<Collider>());
-            */
+
             Rigidbody rb = coll.GetComponent<Rigidbody>();
 
-            if (rb != null) // && !rb.CompareTag("Player") )
+            if (rb != null)
             {
-                Debug.Log("GameManager.Explode i :: " + i + " :: " + rb.name);
+                // Debug.Log("GameManager.Explode i :: " + i + " :: " + rb.name);
+
                 // Does the ray intersect any objects excluding the rb
                 bool exposed = true;
 
                 Vector3 dir = (rb.position - explosionPos).normalized;
                 if (dir.magnitude == 0) dir = Vector3.up;
+
                 // Get dist to point of intersection
                 RaycastHit hit;
                 Ray ray = new Ray(explosionPos, dir);
-                Debug.Log("GM.Explode (rb.position - explosionPos) : " + (rb.position - explosionPos));
 
-                Debug.Log("GameManager.Explode Dir (" + dir + ") vs ray.direction (" + ray.direction + ")");
+                // Debug.Log("GM.Explode (rb.position - explosionPos) : " + (rb.position - explosionPos));
+                // Debug.Log("GameManager.Explode Dir (" + dir + ") vs ray.direction (" + ray.direction + ")");
+
                 float dist;
                 if (coll.Raycast(ray, out hit, radius))
                 {
@@ -372,25 +378,26 @@ public class GameManager : Singleton<GameManager>
                     dist = Mathf.Clamp(Vector3.Distance(rb.position, explosionPos), 0, radius);
                 }
 
-                // Does the ray intersect any objects excluding the player layer
-                if (Physics.Raycast(rb.transform.position, dir, out hit, dist))
+                // Does the ray from explosion to rb intersect any objects excluding our exceptions below
+                if (Physics.Raycast(explosionPos, dir, out hit, dist, playerLayer, QueryTriggerInteraction.Ignore))
                 {
                     if (hit.collider != null)
                     {
-                        Debug.Log("GameManager.Explode Hit...");
-                        Debug.Log("GameManager.Explode hit ==> " + hit);
+                        // Debug.Log("GameManager.Explode Hit...");
+                        // Debug.Log("GameManager.Explode hit ==> " + hit);
                         // Debug.Log("hit.rigidbody ==> "+hit.rigidbody);
-                        Debug.Log("GameManager.Explode hit.transform.name ==> " + hit.transform.name);
+                        // Debug.Log("GameManager.Explode hit.transform.name ==> " + hit.transform.name);
                         // Debug.Log("rb ==> "+rb);
                         // Debug.Log("rb.transform ==> "+rb.transform);
                         // Debug.Log("_player.transform ==> "+_player.transform);
 
-                        exposed = coll == hit.collider
+                        exposed =
+                        hit.rigidbody == rb // collider is in rb's gameObject
                         || hit.transform.IsChildOf(rb.transform)
-                        || hit.transform == _player.transform
-                        || hit.transform.IsChildOf(_player.transform)
+                        // || hit.transform == _player.transform
+                        // || hit.transform.IsChildOf(_player.transform)
                         || (hit.rigidbody && hit.rigidbody.isKinematic)
-                        || hit.collider.isTrigger
+                        // || hit.collider.isTrigger
                         || hit.transform.name.Contains("Ground");
                     }
                 }
@@ -398,7 +405,6 @@ public class GameManager : Singleton<GameManager>
                 {
                     // Debug.Log("GM Explode exposed = true");
                     IDamageable damageable = rb.GetComponent<IDamageable>();
-                    // if (rb.CompareTag("Mummy") && !rb.name.Contains("Separated"))
                     if (damageable != null)
                     {
                         // Apply Damage 
@@ -407,28 +413,30 @@ public class GameManager : Singleton<GameManager>
                         damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
 
-                        Debug.Log("GameManager Explode hit [" + rb.name + "], damage to apply ==> " + damage);
+                        // Debug.Log("GameManager Explode hit [" + rb.name + "], damage to apply ==> " + damage);
                         // GameObject[] debris = 
                         // if (damage > 0)
 
                         damageable.TakeDamage(damage);
                         // Debug.Log("debris.length ==> "+debris.Length);
                     }
-                    else if (rb.name == "Head" || rb.name == "Torso" || rb.name == "Legs")
-                    {
-                        List<GameObject> pieces = rb.GetComponent<SubdivideObjectScript>().SubdivideMe();
-                        // Debug.Log("pieces.Length: "+pieces.Length);
-                        // for (int p = 0; p < pieces.Count; p++)
-                        // {
+                    // else if (rb.name == "Head" || rb.name == "Torso" || rb.name == "Legs")
+                    // {
+                    //     List<GameObject> pieces = rb.GetComponent<SubdivideObjectScript>().SubdivideMe();
+                    //     // Debug.Log("pieces.Length: "+pieces.Length);
+                    //     // for (int p = 0; p < pieces.Count; p++)
+                    //     // {
 
-                        //     GameObject piece = pieces[p];
-                        //     // Debug.Log("piece["+p+"]: "+piece);
-                        //     piece.GetComponent<Rigidbody>().AddExplosionForce(explodePower, explosionPos, radius, upwardsModifier);
-                        // }
-                    }
+                    //     //     GameObject piece = pieces[p];
+                    //     //     // Debug.Log("piece["+p+"]: "+piece);
+                    //     //     piece.GetComponent<Rigidbody>().AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
+                    //     // }
+                    // }
                     else if (rb.gameObject == _player)
                     {
                         // This damage calculation is redundant with Mummy damage calculation above ^
+                        // Player needs IDamageable interface
+
                         float damagef = explosionForce / 10f;
                         damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
@@ -439,25 +447,27 @@ public class GameManager : Singleton<GameManager>
                         }
                         Debug.Log("GM.Explode hit Player");
                     }
-                    else
-                    {
-                        // rb.AddExplosionForce(explodePower, explosionPos, radius, upwardsModifier);
-                        Debug.Log("GM.Explode found no damageable");
-                    }
-                }
-                else
-                {
+                    // else
+                    // {
+                    //     rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
+                    //     // Debug.Log("GM.Explode found no damageable");
+
+                    // }
+                    // }
+                    // else
+                    // {
                     // Not exposed
                     // Debug.Log("Collider "+rb.name+" Blocked By ==> "+hit.rigidbody.name);
                 }
             }
-            else
-            {
-                Debug.Log("GM.Explode coll[" + i + "] has no RB");
-            }
+            // else
+            // {
+            //     Debug.Log("GM.Explode coll[" + i + "] has no RB");
+            // }
         }
 
         // Apply explosion force to nearby objects, and their rigidbody children
+
         Collider[] colliders1 = Physics.OverlapSphere(explosionPos, radius, ~0); //~0
 
         for (int i = 0; i < colliders1.Length; i++)
@@ -469,6 +479,7 @@ public class GameManager : Singleton<GameManager>
             if (RBs.Length == 0)
             {
                 // Debug.Log("GameManager - NO RBs");
+
                 // Collider has no Rigidbody
                 // Look for Rigidbody in root parent
                 //Transform topParent = collider.transform.root;
@@ -487,29 +498,27 @@ public class GameManager : Singleton<GameManager>
 
                     if (rb != null) // && !rb.CompareTag("Player") )
                     {
-                        /*if
                         // Does the ray intersect any objects excluding the rb
-                        bool exposed = true;
-                        RaycastHit hit;
-                        Vector3 dir = (explosionPos - rb.position).normalized;
-                        float dist = Vector3.Distance(rb.position, explosionPos);
-                        // Does the ray (from rb to explosion center) intersect any objects excluding the player layer
-                        (Physics.Raycast(rb.transform.position, dir, out hit, dist))
-                        {
-                            if(hit.rigidbody != null){
-                                exposed =  rb == hit.rigidbody 
-                                || hit.transform.IsChildOf(rb.transform) 
-                                || hit.transform == _player.transform 
-                                || hit.transform.IsChildOf(_player.transform) 
-                                || hit.rigidbody.isKinematic 
-                                || hit.transform.name.Contains("Ground"); 
-                            }
-                        }
-                        
-                        if( exposed ) {
-                            rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
-                        }
-                        */
+                        // bool exposed = true;
+                        // RaycastHit hit;
+                        // Vector3 dir = (explosionPos - rb.position).normalized;
+                        // float dist = Vector3.Distance(rb.position, explosionPos);
+                        // // Does the ray (from rb to explosion center) intersect any objects excluding the player layer
+                        // (Physics.Raycast(rb.transform.position, dir, out hit, dist))
+                        // {
+                        //     if(hit.rigidbody != null){
+                        //         exposed =  rb == hit.rigidbody 
+                        //         || hit.transform.IsChildOf(rb.transform) 
+                        //         || hit.transform == _player.transform 
+                        //         || hit.transform.IsChildOf(_player.transform) 
+                        //         || hit.rigidbody.isKinematic 
+                        //         || hit.transform.name.Contains("Ground"); 
+                        //     }
+                        // }
+
+                        // if( exposed ) {
+                        //     rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
+                        // }
                         // Add force to all nearby rigidbodies, regardless of whether exposed
                         rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
                     }
@@ -517,6 +526,7 @@ public class GameManager : Singleton<GameManager>
             }
 
         }
+
 
         // show explosion
         if (explosionGO != null)
