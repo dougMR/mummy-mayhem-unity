@@ -388,7 +388,16 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
         Turn(_moveDir);
         // transform.rotation = Quaternion.LookRotation( new Vector3(_moveDir.x, 0, _moveDir.z), Vector3.up );
     }
-
+    public void FacePosition(Vector3 position)
+    {
+        StopChase();
+        _moveForce = _moveForceChase;
+        // Find the vector pointing from our position to the target
+        Vector3 _direction = (position - transform.position).normalized;
+        // Face that direction
+        _moveDir = _direction;
+        Turn(_moveDir);
+    }
     public void FaceOther(GameObject other)
     {
         if (Time.time - _bornTime < 9)

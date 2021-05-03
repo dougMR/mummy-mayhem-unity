@@ -784,7 +784,7 @@ MonoBehaviour:
   attackGrowl: {fileID: 8300000, guid: 97a49cde96afc4038be704537d87106d, type: 3}
   attackClip: {fileID: 8300000, guid: 4cc09a8ca0d474769bd05698207a757c, type: 3}
   floatingTextCanvasPrefab: {fileID: 2356900462887370669, guid: 63f59d60d739a41ebb88f6c398ea215a, type: 3}
-  _maxHP: 18
+  _maxHP: 10
 --- !u!114 &-2747922351386657635
 MonoBehaviour:
   m_ObjectHideFlags: 0

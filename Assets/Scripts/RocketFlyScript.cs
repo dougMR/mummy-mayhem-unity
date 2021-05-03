@@ -9,13 +9,12 @@ public class RocketFlyScript : MonoBehaviour
     private float thrust = 20.0f;
     public GameObject explosionGO; // drag your explosion prefab here
     private float radius = 12;
-    private float explodePower = 400;
-    private float upwardsModifier = 1.0F;
+    private float explodePower = 40;
+    // private float upwardsModifier = 1.0F;
     // private GameObject explosionParticleEffect;
     private float _lifetime = 8.0f;
     // private bool detonated = false;
     // Start is called before the first frame update
-    private CauseCommotionScript _commotionScript;
 
 
     void Start()
@@ -23,7 +22,6 @@ public class RocketFlyScript : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.AddTorque(transform.forward * (-3));
         rb.velocity = transform.forward * thrust;
-        _commotionScript = GetComponent<CauseCommotionScript>();
     }
 
     void FixedUpdate()
@@ -53,12 +51,14 @@ public class RocketFlyScript : MonoBehaviour
     {
 
         // CHange this to use GameManager.Instance.Explode
+        GameManager.Instance.Explode(transform.position, radius, explodePower, explosionGO);
 
         // if (!detonated)
         // {
         // detonated = true;
 
         // Apply explosion force to nearby objects
+        /*
         Vector3 explosionPos = transform.position;
         Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
         for (int i = 0; i < colliders.Length; i++)
@@ -137,7 +137,7 @@ public class RocketFlyScript : MonoBehaviour
 
         Destroy(expl, 3); // delete the explosion after 3 seconds
 
-        _commotionScript.CauseCommotion(50f, 3f);
+        */
 
         Destroy(gameObject);
 

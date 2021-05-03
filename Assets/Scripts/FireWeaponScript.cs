@@ -37,7 +37,6 @@ public class FireWeaponScript : MonoBehaviour
     // private int maxAmmo = 100;
     // private int currentAmmo;
 
-    private CauseCommotionScript _commotionScript;
     private GameObject _club;
     private AudioSource _clubWhooshSound;
     private float _lastSwingTime = 0f;
@@ -52,9 +51,6 @@ public class FireWeaponScript : MonoBehaviour
     void Start()
     {
         _club = GameObject.Find("Player/Main Camera/ClubHolder/Club");
-        // _gun = GameObject.Find("Main Camera/Gun");
-        _commotionScript = GetComponent<CauseCommotionScript>();
-        // CurrentWeapon = "Club";
         if (gunClip != null)
         {
             gunSound = gameObject.AddComponent<AudioSource>();
@@ -153,7 +149,7 @@ public class FireWeaponScript : MonoBehaviour
         }, 1f);
 
         // 2. cast forward-facing ray
-        ShootBullet(96f, 0.3f);
+        ShootBullet(10f, 0.3f);
         //   2b. get distance of ray hit
         //   2c. calculate time for bullet to travel that distance
         //   2d. wait that duration
@@ -249,10 +245,10 @@ public class FireWeaponScript : MonoBehaviour
     }
 
 
-    void ShootBullet(float impactPower = 64f, float impactRadius = 0.2f)
+    void ShootBullet(float impactPower = 8f, float impactRadius = 0.2f)
     {
 
-        Debug.Log("     ------  FireWeaponScript.ShootBullet()");
+        // Debug.Log("     ------  FireWeaponScript.ShootBullet()");
         Transform cameraTransform = Camera.main.transform;
         Vector3 pistolPos = cameraTransform.position;
         Vector3 shotDirection = cameraTransform.forward;
@@ -273,7 +269,7 @@ public class FireWeaponScript : MonoBehaviour
 
             if (hit.rigidbody != null)
             {
-                Debug.Log("FireWeapon.Shoot hit [" + hit.rigidbody.name + "]");
+                // Debug.Log("FireWeapon.Shoot hit [" + hit.rigidbody.name + "]");
                 hit.rigidbody.AddForceAtPosition(shotDirection * impactPower * 2, hit.point);
             }
 
@@ -334,27 +330,27 @@ public class FireWeaponScript : MonoBehaviour
             else if (weaponName == "Grenade Launcher")
             {
                 LaunchGrenade();
-                _commotionScript.CauseCommotion(8f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 8f, 3f);
             }
             else if (weaponName == "Rocket Launcher")
             {
                 FireRocket();
-                _commotionScript.CauseCommotion(20f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 20f, 3f);
             }
             else if (weaponName == "Club")
             {
                 SwingClub();
-                _commotionScript.CauseCommotion(5f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 5f, 3f);
             }
             else if (weaponName == "Pistol")
             {
                 FirePistol();
-                _commotionScript.CauseCommotion(10f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 10f, 3f);
             }
             else if (weaponName == "AK47")
             {
                 FireAK47();
-                _commotionScript.CauseCommotion(10f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 10f, 3f);
             }
             else if (weaponName == "None")
             {

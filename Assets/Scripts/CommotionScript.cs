@@ -6,6 +6,7 @@ public class CommotionScript : MonoBehaviour
 {
     public float duration = 1f;
     public float radius;
+    private Coroutine _destroyMeCo;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,6 +25,7 @@ public class CommotionScript : MonoBehaviour
     private bool IsMummy(GameObject other)
     {
         return other.name.Contains("Mummy") && !other.name.Contains("Separated");
+
     }
     public float Radius
     {
@@ -31,7 +33,7 @@ public class CommotionScript : MonoBehaviour
         set
         {
             radius = value;
-            // transform.Find("Sphere").transform.localScale = new Vector3(radius*2, radius*2, radius*2);
+            // transform.Find("Sphere").transform.localScale = new Vector3(radius * 2, radius * 2, radius * 2);
             // transform.GetComponent<SphereCollider>().radius = Radius;
         }
     }
@@ -41,8 +43,9 @@ public class CommotionScript : MonoBehaviour
         set
         {
             duration = value;
-            CancelInvoke("DestroySelf");
-            Invoke("DestroySelf", duration);
+            // CancelInvoke("DestroySelf");
+            // Invoke("DestroySelf", duration);
+            GameManager.Instance.DelayFunction(DestroySelf, duration);
         }
     }
 

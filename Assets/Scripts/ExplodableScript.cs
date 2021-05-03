@@ -9,9 +9,10 @@ public class ExplodableScript : MonoBehaviour, IDamageable
     public GameObject preExplosionGO;
     public float radius = 8.0f;
     public float explodePower = 200f;
-    private CauseCommotionScript _commotionScript;
     private int _hp;
     private bool _exploded = false;
+    private float _lastVelocity = 0;
+    private float _maxSafeSpeedChange = 5f;
 
     private void Start()
     {
@@ -22,10 +23,22 @@ public class ExplodableScript : MonoBehaviour, IDamageable
     private void Init()
     {
         HP = myHP;
-        _commotionScript = GetComponent<CauseCommotionScript>();
     }
 
-
+    private void FixedUpdate()
+    {
+        // Monitor changes in velocity
+        float velocity = GetComponent<Rigidbody>().velocity.magnitude;
+        float velDiff = Mathf.Abs(velocity - _lastVelocity);
+        if (velDiff > _maxSafeSpeedChange)
+        {
+            Debug.Log("Explodable velocity change: " + velDiff);
+            float overage = velDiff - _maxSafeSpeedChange;
+            int damage = (int)overage;
+            TakeDamage(damage);
+        }
+        _lastVelocity = velocity;
+    }
     /*
     private void OnCollisionEnter(Collision other)
     {
@@ -58,6 +71,7 @@ public class ExplodableScript : MonoBehaviour, IDamageable
         if (_exploded) return;
         // Show initial explosion animation
         GameObject expl = (GameObject)Instantiate(preExplosionGO, transform.position, Quaternion.identity);
+        // Swell the barrel
         transform.localScale = transform.localScale * 1.1f;
         GameManager.Instance.DelayFunction(ExplodeMe, 0.5f);
         _exploded = true;
@@ -73,10 +87,6 @@ public class ExplodableScript : MonoBehaviour, IDamageable
         // call GameManager Explosion
         // Debug.Log("Explodable transform.position : " + transform.position);
         // Debug.Log("Explodable radius, power, go :: " + radius + ", " + explodePower + ", " + explosionGO.name);
-
-        // cause commotion
-
-        // GameManager.Instance.CauseCommotion(radius * 4, explodePower / 100f);
 
 
         // destroy me

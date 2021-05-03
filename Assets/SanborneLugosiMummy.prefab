@@ -719,9 +719,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitMeClip: {fileID: 8300000, guid: 24e08f647c7834d91a054c304b8ebf34, type: 3}
-  floatingTextCanvasPrefab: {fileID: 2356900462887370669, guid: 63f59d60d739a41ebb88f6c398ea215a, type: 3}
-  _maxHP: 8
+  attackGrowl: {fileID: 0}
   attackClip: {fileID: 8300000, guid: 4cc09a8ca0d474769bd05698207a757c, type: 3}
+  floatingTextCanvasPrefab: {fileID: 2356900462887370669, guid: 63f59d60d739a41ebb88f6c398ea215a, type: 3}
+  _maxHP: 10
 --- !u!114 &8532259280564046136
 MonoBehaviour:
   m_ObjectHideFlags: 0

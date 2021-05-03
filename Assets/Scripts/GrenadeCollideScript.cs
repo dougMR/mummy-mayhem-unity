@@ -6,18 +6,16 @@ public class GrenadeCollideScript : MonoBehaviour
 {
     public GameObject explosionGO; // drag your explosion prefab here
     public GameObject explosionGO2;
-    private float radius = 6;
-    private float explodePower = 100;
+    private float radius = 12;
+    private float explodePower = 10;
     // private float upwardsModifier = 1.0F;
     private GameObject explosionParticleEffect;
 
     private bool detonated = false;
-    private CauseCommotionScript _commotionScript;
 
     void Start()
     {
         // explosionGO = Resources.Load("Explosion") as GameObject;
-        _commotionScript = GetComponent<CauseCommotionScript>();
     }
 
     /*
@@ -79,11 +77,6 @@ public class GrenadeCollideScript : MonoBehaviour
 
             // Show 2nd explosion animation
             GameObject expl = (GameObject)Instantiate(explosionGO2, transform.position, Quaternion.identity);
-
-
-
-            // Cause A Commotion...
-            _commotionScript.CauseCommotion(12f, 3f);
 
         }
     }

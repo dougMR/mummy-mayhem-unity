@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4265028253443019273}
   - component: {fileID: 3987332766072726202}
   - component: {fileID: -5816984837919957329}
-  - component: {fileID: 2878152642389152810}
   m_Layer: 0
   m_Name: Grenade
   m_TagString: Grenade
@@ -128,16 +127,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   explosionGO: {fileID: 6933842561650168123, guid: 513559d04d1414c72b132e30676ad4a9, type: 3}
   explosionGO2: {fileID: 100004, guid: 6e8c7c425e5bc374daf95a774767b1e3, type: 3}
---- !u!114 &2878152642389152810
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2669670686350611924}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af98c68efba79482d8676e72614265d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  commotionPrefab: {fileID: 2799479680758036756, guid: 285bf46dae6d14ebe9b0825fe6f3f872, type: 3}

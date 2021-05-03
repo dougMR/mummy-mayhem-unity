@@ -26,6 +26,7 @@ public class GameManager : Singleton<GameManager>
     private float _defaultMessageDuration = 2f;
     private GameObject _player;
     private int _difficultyLevel = 1;
+    private int _enemiesMask = -1;
 
     protected override void Awake()
     {
@@ -36,6 +37,8 @@ public class GameManager : Singleton<GameManager>
         _spriteHolderImage.gameObject.SetActive(false);
         // Debug.Log("_spriteHolderImage:: "+_spriteHolderImage);
         _player = GameObject.Find("Player");
+        int layerInt = LayerMask.NameToLayer("Enemies"); // -1 if not found
+        _enemiesMask = layerInt == -1 ? ~0 : 1 << layerInt; // ~ is bitwise NOT, so ~0 means All Layers
     }
     void Start()
     {
@@ -332,7 +335,7 @@ public class GameManager : Singleton<GameManager>
         Collider[] colliders = Physics.OverlapSphere(explosionPos, radius, layerMask);
         List<Collider> usedColliders = new List<Collider>(); // <-- for treating multiple GO colliders as single collider
 
-        Debug.Log("GM.Explode #colliders ==> " + colliders.Length);
+        // Debug.Log("GM.Explode #colliders ==> " + colliders.Length);
 
         for (int i = 0; i < colliders.Length; i++)
         {
@@ -342,7 +345,7 @@ public class GameManager : Singleton<GameManager>
             if (usedColliders.Contains(coll))
             {
                 // skip this collider
-                Debug.Log("Skip This Collider!! -- " + coll.name);
+                // Debug.Log("Skip This Collider!! -- " + coll.name);
                 continue;
             }
             usedColliders.AddRange(coll.GetComponentsInChildren<Collider>());
@@ -409,7 +412,7 @@ public class GameManager : Singleton<GameManager>
                     {
                         // Apply Damage 
 
-                        float damagef = explosionForce / 10f;
+                        float damagef = explosionForce;
                         damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
 
@@ -469,11 +472,12 @@ public class GameManager : Singleton<GameManager>
         // Apply explosion force to nearby objects, and their rigidbody children
 
         Collider[] colliders1 = Physics.OverlapSphere(explosionPos, radius, ~0); //~0
-
+        // Debug.Log("GM.Explode #colliders1[] :: " + colliders1.Length);
         for (int i = 0; i < colliders1.Length; i++)
         {
             Collider collider = colliders1[i];
             Rigidbody[] RBs = collider.GetComponentsInChildren<Rigidbody>();
+            // Debug.Log("GM.Explode, collider[ " + collider.name + " ], #RBs :: " + RBs.Length);
 
             // If no child rbs, look for rigidbody in top parent
             if (RBs.Length == 0)
@@ -487,8 +491,8 @@ public class GameManager : Singleton<GameManager>
 
                 if (topRB != null)
                 {
-                    // Debug.Log("topRB:: "+topRB.name);
-                    topRB.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
+                    // Debug.Log("topRB:: " + topRB.name);
+                    topRB.AddExplosionForce(explosionForce * 10, explosionPos, radius, upwardsModifier);
                 }
             }
             else
@@ -520,11 +524,11 @@ public class GameManager : Singleton<GameManager>
                         //     rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
                         // }
                         // Add force to all nearby rigidbodies, regardless of whether exposed
-                        rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
+                        // Debug.Log("GM.Explode collider[ " + collider.name + " ], rb[ " + rb.name + " ]");
+                        rb.AddExplosionForce(explosionForce * 10, explosionPos, radius, upwardsModifier);
                     }
                 }
             }
-
         }
 
 
@@ -537,13 +541,27 @@ public class GameManager : Singleton<GameManager>
             // Debug.Log("expl: " + expl);
         }
 
+        CauseCommotion(explosionPos, radius * 2f, explosionForce * 0.3f);
+
     }
 
-    public void CauseCommotion(float radius, float duration)
+    public void CauseCommotion(Vector3 position, float radius, float duration)
     {
-        GameObject commotion = Instantiate(commotionPrefab, transform.position, Quaternion.identity);
-        commotion.GetComponent<CommotionScript>().Duration = duration;
-        commotion.GetComponent<CommotionScript>().Radius = radius;
+        //return; // <-- CauseCommotion Stalls game.  Find solution.
+        Collider[] colliders = Physics.OverlapSphere(position, radius, _enemiesMask);
+        foreach (Collider coll in colliders)
+        {
+            if (coll.name.Contains("Mummy") && !coll.name.Contains("Separated"))
+            {
+                coll.gameObject.GetComponent<EnemyAIScript>().FacePosition(position);
+            }
+        }
+
+
+        // Debug.Log("GM.CauseCommotion.Duration:: " + duration);
+        // GameObject commotion = Instantiate(commotionPrefab, position, Quaternion.identity);
+        // commotion.GetComponent<CommotionScript>().Duration = duration;
+        // commotion.GetComponent<CommotionScript>().Radius = radius;
     }
 
     void SetPaused(bool value)
