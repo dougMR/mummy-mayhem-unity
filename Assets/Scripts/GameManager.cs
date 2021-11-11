@@ -319,7 +319,7 @@ public class GameManager : Singleton<GameManager>
 
     public void Explode(Vector3 explosionPos, float radius, float explosionForce, GameObject explosionGO, string maskLayerName = "Enemies")
     {
-        Debug.Log("GameManager.Explode()");
+        // Debug.Log("GameManager.Explode()");
 
         float upwardsModifier = 1.0F;
 
@@ -328,7 +328,7 @@ public class GameManager : Singleton<GameManager>
 
         int playerLayer = 1 << LayerMask.NameToLayer("Player");
         // layerMask = layerMask | playerLayer;
-        int layerMask = ~0;
+        int layerMask = ~0; // All Layers
 
 
         // Check for Explosion hit Mummies
@@ -342,10 +342,10 @@ public class GameManager : Singleton<GameManager>
             Collider coll = colliders[i];
 
             // Check against multiple colliders in same gameObject
-            if (usedColliders.Contains(coll))
+            if (usedColliders.Contains(coll) || coll.isTrigger)
             {
                 // skip this collider
-                // Debug.Log("Skip This Collider!! -- " + coll.name);
+                Debug.Log("Skip This Collider!! -- A" + i + ", " + coll.name);
                 continue;
             }
             usedColliders.AddRange(coll.GetComponentsInChildren<Collider>());
@@ -415,11 +415,13 @@ public class GameManager : Singleton<GameManager>
                         float damagef = explosionForce;
                         damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
+                        if (rb.name == "Player")
+                        {
+                            Debug.Log("GameManager Explode hit [A" + i + ", " + rb.name + "], damage to apply ==> " + damage);
+                        }
 
-                        // Debug.Log("GameManager Explode hit [" + rb.name + "], damage to apply ==> " + damage);
                         // GameObject[] debris = 
                         // if (damage > 0)
-
                         damageable.TakeDamage(damage);
                         // Debug.Log("debris.length ==> "+debris.Length);
                     }
@@ -443,7 +445,7 @@ public class GameManager : Singleton<GameManager>
                         float damagef = explosionForce / 10f;
                         damagef *= (radius - dist) / radius;
                         int damage = 1 + (int)Mathf.Ceil(damagef);
-                        // Debug.Log("GM.Explode, damage to Player:: " + damage);
+                        Debug.Log("A GM.Explode, damage to Player:: " + damage);
                         if (damageable != null)
                         {
                             damageable.TakeDamage(damage);
@@ -476,6 +478,13 @@ public class GameManager : Singleton<GameManager>
         for (int i = 0; i < colliders1.Length; i++)
         {
             Collider collider = colliders1[i];
+
+            if (collider.isTrigger)
+            {
+                Debug.Log("GM.Explode B" + i + ", collider is trigger, " + collider.name);
+
+                continue;
+            }
             Rigidbody[] RBs = collider.GetComponentsInChildren<Rigidbody>();
             // Debug.Log("GM.Explode, collider[ " + collider.name + " ], #RBs :: " + RBs.Length);
 
@@ -493,6 +502,10 @@ public class GameManager : Singleton<GameManager>
                 {
                     // Debug.Log("topRB:: " + topRB.name);
                     topRB.AddExplosionForce(explosionForce * 10, explosionPos, radius, upwardsModifier);
+                    if (topRB.name == "Player")
+                    {
+                        Debug.Log("GM B" + i + ", Player trigger collider impacted by explosion");
+                    }
                 }
             }
             else
@@ -524,7 +537,11 @@ public class GameManager : Singleton<GameManager>
                         //     rb.AddExplosionForce(explosionForce, explosionPos, radius, upwardsModifier);
                         // }
                         // Add force to all nearby rigidbodies, regardless of whether exposed
-                        // Debug.Log("GM.Explode collider[ " + collider.name + " ], rb[ " + rb.name + " ]");
+                        if (rb.name == "Player")
+                        {
+                            Debug.Log("GM.Explode [B" + i + "], collider[ " + collider.name + " ], rb[ " + rb.name + " ]");
+                        }
+
                         rb.AddExplosionForce(explosionForce * 10, explosionPos, radius, upwardsModifier);
                     }
                 }
@@ -537,6 +554,22 @@ public class GameManager : Singleton<GameManager>
         {
             GameObject expl = (GameObject)Instantiate(explosionGO, explosionPos, Quaternion.identity);
 
+
+
+            // float testR = radius * 0.1f;
+            // expl.transform.localScale = new Vector3(testR, testR, testR);
+
+
+            ParticleSystem particleSystem = expl.GetComponent<ParticleSystem>();
+            ParticleSystem.ShapeModule shape = GetComponent<ParticleSystem>().shape;
+            float r = shape.radius;
+            Debug.Log(" ***  particle system radius: " + r);
+            // float scaleRatio = 1.0f / r;
+
+            // float testR = radius * scaleRatio;
+
+            // expl.transform.localScale = new Vector3(testR, testR, testR);
+
             Destroy(expl, 3); // delete the explosion after 3 seconds
             // Debug.Log("expl: " + expl);
         }
@@ -547,7 +580,6 @@ public class GameManager : Singleton<GameManager>
 
     public void CauseCommotion(Vector3 position, float radius, float duration)
     {
-        //return; // <-- CauseCommotion Stalls game.  Find solution.
         Collider[] colliders = Physics.OverlapSphere(position, radius, _enemiesMask);
         foreach (Collider coll in colliders)
         {

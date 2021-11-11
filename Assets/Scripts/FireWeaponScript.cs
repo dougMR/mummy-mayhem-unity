@@ -330,12 +330,12 @@ public class FireWeaponScript : MonoBehaviour
             else if (weaponName == "Grenade Launcher")
             {
                 LaunchGrenade();
-                GameManager.Instance.CauseCommotion(transform.position, 8f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 10f, 3f);
             }
             else if (weaponName == "Rocket Launcher")
             {
                 FireRocket();
-                GameManager.Instance.CauseCommotion(transform.position, 20f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 30f, 3f);
             }
             else if (weaponName == "Club")
             {
@@ -345,12 +345,12 @@ public class FireWeaponScript : MonoBehaviour
             else if (weaponName == "Pistol")
             {
                 FirePistol();
-                GameManager.Instance.CauseCommotion(transform.position, 10f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 30f, 3f);
             }
             else if (weaponName == "AK47")
             {
                 FireAK47();
-                GameManager.Instance.CauseCommotion(transform.position, 10f, 3f);
+                GameManager.Instance.CauseCommotion(transform.position, 40f, 3f);
             }
             else if (weaponName == "None")
             {

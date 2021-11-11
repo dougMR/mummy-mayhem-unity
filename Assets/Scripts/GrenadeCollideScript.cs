@@ -6,7 +6,7 @@ public class GrenadeCollideScript : MonoBehaviour
 {
     public GameObject explosionGO; // drag your explosion prefab here
     public GameObject explosionGO2;
-    private float radius = 12;
+    private float radius = 10;
     private float explodePower = 10;
     // private float upwardsModifier = 1.0F;
     private GameObject explosionParticleEffect;

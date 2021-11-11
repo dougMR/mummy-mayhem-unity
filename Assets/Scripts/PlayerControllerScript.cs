@@ -37,6 +37,11 @@ public class PlayerControllerScript : MonoBehaviour
 }
 */
 
+/*
+This Script is Deactivated.  
+Player Movement is handled in PlayerMovementScript.cs
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

@@ -7,6 +7,7 @@ public class ExplodableScript : MonoBehaviour, IDamageable
     public int myHP = 50;
     public GameObject explosionGO; // drag your explosion prefab here
     public GameObject preExplosionGO;
+    public float delay = 0.5f;
     public float radius = 8.0f;
     public float explodePower = 200f;
     private int _hp;
@@ -73,7 +74,7 @@ public class ExplodableScript : MonoBehaviour, IDamageable
         GameObject expl = (GameObject)Instantiate(preExplosionGO, transform.position, Quaternion.identity);
         // Swell the barrel
         transform.localScale = transform.localScale * 1.1f;
-        GameManager.Instance.DelayFunction(ExplodeMe, 0.5f);
+        GameManager.Instance.DelayFunction(ExplodeMe, delay);
         _exploded = true;
     }
     private void ExplodeMe()

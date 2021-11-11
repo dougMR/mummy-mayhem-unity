@@ -10,17 +10,18 @@ public class ClubContactScript : MonoBehaviour
     private AudioSource thumpSound;
     private GameObject _player;
     private float _clubForce = 64.0f;
+    private float _radius = 0.25f;
     private bool _newSwing = true;
     // private int _clubDamage = 1;
     // Start is called before the first frame update
     void Start()
     {
         thumpSound = gameObject.AddComponent<AudioSource>();
-        thumpSound.clip = thumpClip; 
+        thumpSound.clip = thumpClip;
         // thumpSound.volume = 0.9f;
         thumpSound.playOnAwake = false;
         _player = transform.root.gameObject;
-        Debug.Log("ClubContactScript.Start()");
+        // Debug.Log("ClubContactScript.Start()");
     }
 
     // Update is called once per frame
@@ -31,16 +32,19 @@ public class ClubContactScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        
+
         // if(other.name != "Player" ){
         // if(!other.gameObject.layer == "Player"){
         // if(!other.transform.IsChildOf(_player.transform)){
-        if(other.transform.root != _player.transform){
-            
-            Rigidbody otherRB = other.GetComponent<Rigidbody>();
-            if( otherRB != null ){
+        if (other.transform.root != _player.transform)
+        {
 
-                if (!NewSwing){
+            Rigidbody otherRB = other.GetComponent<Rigidbody>();
+            if (otherRB != null)
+            {
+
+                if (!NewSwing)
+                {
                     return;
                 }
                 NewSwing = false;
@@ -50,20 +54,29 @@ public class ClubContactScript : MonoBehaviour
                 thumpSound.Play();
 
                 // float explodePower = _clubForce;
-                Vector3 explosionPos = transform.position;
-                float radius = 1.0f;
+
                 // float upwardsModifier = 0.2f;
-                
+
                 // if ( otherRB.CompareTag("Mummy") && !otherRB.name.Contains("Separated"))gggg
                 // {   
                 //     otherRB.GetComponent<EnemyAIScript>().ApplyDamage( _clubDamage );
                 // }else {
-                    
+
                 // }
-                GameManager.Instance.Explode( explosionPos, radius, _clubForce, explosionGO, "Enemies");
+                GameManager.Instance.Explode(transform.position, _radius, _clubForce, explosionGO, "Enemies");
                 // other.GetComponent<Rigidbody>().AddForce(_player.transform.forward * _clubForce);
                 // Push target back...
-                other.transform.position += _player.transform.forward * _clubForce * 0.01f;
+                if (other.name.Contains("Mummy"))
+                {
+                    // other.transform.position += _player.transform.forward * 0.5f;
+                    otherRB.AddForce(_player.transform.forward * 5f, ForceMode.VelocityChange);
+                }
+                else
+                {
+                    otherRB.AddForce(_player.transform.forward, ForceMode.Impulse);
+                }
+                // Debug.Log("ClubContactScript other.name:: " + otherRB.name);
+                // GameManager.Instance.GamePaused = true;
                 /*
                 if ( otherRB.CompareTag("Mummy") && !otherRB.name.Contains("Separated"))
                 {                    
@@ -110,7 +123,7 @@ public class ClubContactScript : MonoBehaviour
                 */
 
 
-                
+
                 // Vector3 forceVector = (other.transform.position - _player.transform.position).normalized; 
 
                 // RaycastHit hit;
@@ -118,36 +131,38 @@ public class ClubContactScript : MonoBehaviour
                 // Vector3 spawnPoint = transform.position;
                 // GameObject collisionSphere = Instantiate(CollisionSpherePrefab, spawnPoint, Quaternion.identity) as GameObject;
                 // collisionSphere.GetComponent<Rigidbody>().AddForce(forceVector * _clubForce, ForceMode.Impulse);
-                
-            }
-        }        
-    }
-
-   /* private void OnCollisionEnter(Collision collision) {
-        if(collision.collider.name != "Player"){
-            
-            Rigidbody otherRB = collision.collider.GetComponent<Rigidbody>();
-            if( otherRB != null){
-                ContactPoint contact = collision.contacts[0];
-                Vector3 forceVector = (contact.point - _player.transform.position);
-                // Get vector parallel to ground, so we are not hitting up (which launches Mummies into the air)
-                forceVector = Vector3.ProjectOnPlane(forceVector, Vector3.up).normalized * _clubForce;
-                otherRB.AddForce(forceVector, ForceMode.Impulse);
-                thumpSound.Play();
-
-                Debug.Log("Club Collided: "+collision.collider.name);
-            
-                Debug.Log("normal: "+contact.normal);
-                Debug.DrawRay(_player.transform.position, forceVector.normalized, Color.green, 4, false);
-                // GameManager.Instance.GamePaused = true;
-                Debug.Log("DIst:: "+contact.separation);
 
             }
         }
-    }*/
-    public bool NewSwing {
+    }
+
+    /* private void OnCollisionEnter(Collision collision) {
+         if(collision.collider.name != "Player"){
+
+             Rigidbody otherRB = collision.collider.GetComponent<Rigidbody>();
+             if( otherRB != null){
+                 ContactPoint contact = collision.contacts[0];
+                 Vector3 forceVector = (contact.point - _player.transform.position);
+                 // Get vector parallel to ground, so we are not hitting up (which launches Mummies into the air)
+                 forceVector = Vector3.ProjectOnPlane(forceVector, Vector3.up).normalized * _clubForce;
+                 otherRB.AddForce(forceVector, ForceMode.Impulse);
+                 thumpSound.Play();
+
+                 Debug.Log("Club Collided: "+collision.collider.name);
+
+                 Debug.Log("normal: "+contact.normal);
+                 Debug.DrawRay(_player.transform.position, forceVector.normalized, Color.green, 4, false);
+                 // GameManager.Instance.GamePaused = true;
+                 Debug.Log("DIst:: "+contact.separation);
+
+             }
+         }
+     }*/
+    public bool NewSwing
+    {
         get => _newSwing;
-        set {
+        set
+        {
             _newSwing = value;
         }
     }

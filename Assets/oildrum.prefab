@@ -91,8 +91,8 @@ MonoBehaviour:
   myHP: 30
   explosionGO: {fileID: 8334519322748747276, guid: aa000aced1d7b4e048e37dc1174ad1fc, type: 3}
   preExplosionGO: {fileID: 7809258004167922358, guid: 2b2d4bd92020e498583b7eb8756fb7d0, type: 3}
-  radius: 8
-  explodePower: 40
+  radius: 12
+  explodePower: 60
 --- !u!54 &7901560743024496829
 Rigidbody:
   m_ObjectHideFlags: 0

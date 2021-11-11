@@ -23,7 +23,7 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
     private float _moveForceChase = 1.5f;
     private float _moveForce = 0.5f;
     private GameObject _chaseTarget = null;
-    private float _chaseDist = 20f;
+    private float _chaseDist = 30f;
     private int _attackPoints = 1;
     private Rigidbody _rb;
     private Vector3 _moveDir;
@@ -108,8 +108,6 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
     // Update is called once per frame
     void Update()
     {
-        Vector3 constantVelocity = transform.forward * _moveForce;
-        _rb.velocity = new Vector3(constantVelocity.x, _rb.velocity.y, constantVelocity.z);
 
         _changeDirectionTimer -= Time.deltaTime;
         _checkObstaclesTimer -= Time.deltaTime;
@@ -158,7 +156,32 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
 
     void FixedUpdate()
     {
+        var localVelocity = transform.InverseTransformDirection(_rb.velocity);
+        var forwardSpeed = localVelocity.z;
+        if (forwardSpeed < _moveForce)
+        {
+
+            if (transform.name.Contains("(35)"))
+            {
+                forwardSpeed = Mathf.Round(forwardSpeed * 100f) / 100f;
+                Debug.Log(" Enemy forwardSpeed:: " + forwardSpeed + ",\n\r _moveForce:: " + _moveForce + ", addForce(" + (transform.forward * _moveForce * 0.3f) + ", drag: " + _rb.drag);
+            }
+
+            _rb.AddForce(transform.forward * _moveForce * 0.32f, ForceMode.Impulse);
+            // _rb.AddRelativeForce(Vector3.forward * _moveForce * 0.1f, ForceMode.VelocityChange);
+        }
+
+        Vector3 constantVelocity = transform.forward * _moveForce;
+        // _rb.velocity = new Vector3(constantVelocity.x, _rb.velocity.y, constantVelocity.z);
+
         _moveDir = transform.forward; // <-- in case facing changed by outside forces
+
+        // float yVel = _rb.velocity.y;
+        // // _rb.AddForce(transform.forward * _moveForce, ForceMode.Acceleration);
+        // _rb.AddRelativeForce(Vector3.forward * _moveForce, ForceMode.VelocityChange);
+        // _rb.velocity = Vector3.ClampMagnitude(_rb.velocity, _moveForce);
+        // _rb.velocity = new Vector3(_rb.velocity.x, yVel, _rb.velocity.z);
+
         // Vector3 velocityDiff = _rb.velocity - _lastVelocity;
         // if(velocityDiff.magnitude > 2){
 
@@ -211,6 +234,7 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
     public void Die()
     {
         // Debug.Log("EnemyAI.Die()");
+        // !! rename swapMummyScript to segmentMummyScript !!
         GameObject swappedMummy = gameObject.GetComponent<SwapMummyScript>().Swap();
         // Debug.Log("EnemyAI.Die swappedMummy ==> "+swappedMummy.name);
         Rigidbody[] RBs = swappedMummy.GetComponentsInChildren<Rigidbody>();
@@ -397,6 +421,7 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
         // Face that direction
         _moveDir = _direction;
         Turn(_moveDir);
+        _changeDirectionTimer = _myMoveDuration;
     }
     public void FaceOther(GameObject other)
     {

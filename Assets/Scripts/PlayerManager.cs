@@ -143,7 +143,7 @@ public class PlayerManager : Singleton<PlayerManager>
         }
     }
 
-    private void CycleWeapons()
+    public void CycleWeapons()
     {
         // Cycle through to next available weapon
         int index = _currentWeaponIndex;
@@ -436,6 +436,8 @@ public class Weapon
                 // Ammo is too low to subtract from
                 GameManager.Instance.ShowMessage(Name + " is empty.");
                 success = false;
+                // Change Weapon ?
+                // PlayerManager.Instance.CycleWeapons();
             }
         }
         else
