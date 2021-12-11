@@ -14,7 +14,7 @@ public class CarScript : MonoBehaviour
     private GameObject _driver;
     private PlayerMovementScript _PMScript;
     private Rigidbody _rb;
-    private float _inputX, _inputZ, _moveSpeed = 0f, _acceleration = 20.0f, _maxSpeed = 32f; 
+    private float _inputX, _inputZ, _moveSpeed = 0f, _acceleration = 20.0f, _maxSpeed = 32f;
     // _rotateSpeed = 32f;
     private float _gravity = 200f;
     private GameManager GM;
@@ -37,10 +37,14 @@ public class CarScript : MonoBehaviour
     void Update()
     {
         // Is User pressing E key?
-        if(Input.GetKeyUp(KeyCode.E)){
-            if(_playerClose && _driver == null){
+        if (Input.GetKeyUp(KeyCode.E))
+        {
+            if (_playerClose && _driver == null)
+            {
                 SetDriver(GameObject.Find("Player"));
-            } else if(_driver != null){
+            }
+            else if (_driver != null)
+            {
                 RemoveDriver();
             }
         }
@@ -58,11 +62,12 @@ public class CarScript : MonoBehaviour
 
             move();
             _moveSpeed = transform.InverseTransformDirection(GetComponent<Rigidbody>().velocity).z;
-            if(Mathf.Abs(_moveSpeed) < 0.1){
+            if (Mathf.Abs(_moveSpeed) < 0.1)
+            {
                 _moveSpeed = 0;
             }
             //_rb.velocity.sqrMagnitude < _maxSpeed*_maxSpeed
-            _engineSound.pitch = 0.5f + 1.5f*( Mathf.Abs(_moveSpeed) / _maxSpeed );
+            _engineSound.pitch = 0.5f + 1.5f * (Mathf.Abs(_moveSpeed) / _maxSpeed);
 
             if (_moveSpeed != 0)
                 rotate();
@@ -95,10 +100,10 @@ public class CarScript : MonoBehaviour
             {
                 // Decelerate
                 // Debug.Log("Decelerating");
-               
-                _rb.velocity = _rb.velocity * 0.99f; 
+
+                _rb.velocity = _rb.velocity * 0.99f;
                 if (_rb.velocity.sqrMagnitude < Mathf.Pow(0.1f, 2f))
-                {  
+                {
                     _rb.velocity = Vector3.zero;
                     // Debug.Log(_rb.velocity.sqrMagnitude+" :: STOPPED");
                 }
@@ -169,35 +174,40 @@ public class CarScript : MonoBehaviour
         return false;
     }
 
-    void OnTriggerEnter(Collider other){
-        
+    void OnTriggerEnter(Collider other)
+    {
+
         // Is Player in my Trigger?
-        if(other.name == "Player"){
+        if (other.name == "Player")
+        {
             _playerClose = true;
             GM.ShowMessage("Press E key to get in / out of Car.");
-        }  
+        }
     }
-    void OnTriggerExit(Collider other){
-        
+    void OnTriggerExit(Collider other)
+    {
+
         // Is Player in my Trigger?
-        if(other.name == "Player"){
+        if (other.name == "Player")
+        {
             _playerClose = false;
-        }  
+        }
     }
     void OnCollisionEnter(Collision collision)
     {
         float magnitude = (collision.impulse / Time.fixedDeltaTime).magnitude;
         float min = 1000.0f;
-        if (magnitude > min ) {
-            Debug.Log("Car collision magnitude:: "+magnitude);
-            Debug.Log("Car collision impulse:: "+collision.impulse);
-            Debug.Log("Collision other :: "+collision.other.name);
-            Debug.Log("Car Collision name:: "+gameObject.name);
+        if (magnitude > min)
+        {
+            Debug.Log("Car collision magnitude:: " + magnitude);
+            Debug.Log("Car collision impulse:: " + collision.impulse);
+            Debug.Log("Collision other :: " + collision.other.name);
+            Debug.Log("Car Collision name:: " + gameObject.name);
             float range = 4000.0f;
-            _klunk.volume = Mathf.Clamp((magnitude - min)/range, 0.1f, 1);
+            _klunk.volume = Mathf.Clamp((magnitude - min) / range, 0.1f, 1);
             _klunk.Play();
         }
-        
+
     }
 
     void SetDriver(GameObject driver)
@@ -237,7 +247,7 @@ public class CarScript : MonoBehaviour
             _driver.transform.forward.y,
             0
         );
-        _driver.transform.position = transform.position + new Vector3(0f,2f,0f);
+        _driver.transform.position = transform.position + new Vector3(0f, 2f, 0f);
         // _driver.transform.rotation.SetLookRotation(_driver.transform.forward, Vector3.up);
         _driver = null;
         _PMScript = null;

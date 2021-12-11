@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement; // For restarting scene
 
 using UnityEngine.UI;
 
@@ -53,6 +54,14 @@ public class HPScript : MonoBehaviour, IDamageable
             StopCoroutine(damageCo);
         damageCo = StartCoroutine(FlashImage(damageImage));
         UpdateHealthBar();
+        // CHECK IF DEAD !!
+        // if (HP <= 0)
+        // {
+        //     GameManager.Instance.DelayFunction(() =>
+        // {
+        //     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // }, 2f);
+        // }
     }
 
     public void Heal(int amount = 1)

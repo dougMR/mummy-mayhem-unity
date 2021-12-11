@@ -164,7 +164,7 @@ public class EnemyAIScript : MonoBehaviour, IDamageable
             if (transform.name.Contains("(35)"))
             {
                 forwardSpeed = Mathf.Round(forwardSpeed * 100f) / 100f;
-                Debug.Log(" Enemy forwardSpeed:: " + forwardSpeed + ",\n\r _moveForce:: " + _moveForce + ", addForce(" + (transform.forward * _moveForce * 0.3f) + ", drag: " + _rb.drag);
+                // Debug.Log(" Enemy forwardSpeed:: " + forwardSpeed + ",\n\r _moveForce:: " + _moveForce + ", addForce(" + (transform.forward * _moveForce * 0.3f) + ", drag: " + _rb.drag);
             }
 
             _rb.AddForce(transform.forward * _moveForce * 0.32f, ForceMode.Impulse);

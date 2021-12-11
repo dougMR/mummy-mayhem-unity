@@ -32,15 +32,15 @@ public class SimpleCarController : MonoBehaviour
     private float _minSpeedometerAngle = -140f;
     private float _maxSpeedometerAngle = 140f;
     private GameObject _needle;
-    private float _minEngineVol = 0.05f; // based on engine sound I'm using at the time
-    private float _maxEngineVol = 0.2f;
+    private float _minEngineVol = 0.1f; // based on engine sound I'm using at the time
+    private float _maxEngineVol = 0.25f;
 
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         GM = GameManager.Instance;
         _needle = GameObject.Find("needle");
-        Debug.Log("Needle: "+_needle);
+        Debug.Log("Needle: " + _needle);
 
         _engineSound = gameObject.AddComponent<AudioSource>();
         _engineSound.clip = engineClip;
@@ -51,7 +51,7 @@ public class SimpleCarController : MonoBehaviour
         _brakes = gameObject.AddComponent<AudioSource>();
         _brakes.clip = brakesClip;
         _brakes.volume = 0.5f;
-        
+
         // float speedThreshold = 60f;
         // int stepsBelowThreshold = 1;
         // int stepsAboveThreshold = 1;
@@ -62,7 +62,8 @@ public class SimpleCarController : MonoBehaviour
         // }
     }
 
-    void UpdateSpeedometer(){
+    void UpdateSpeedometer()
+    {
         float pct = _mph / _maxMph;
         float degreeRange = _maxSpeedometerAngle - _minSpeedometerAngle;
         float needleAngle = _minSpeedometerAngle + degreeRange * pct;
@@ -73,11 +74,12 @@ public class SimpleCarController : MonoBehaviour
     {
         float magnitude = (collision.impulse / Time.fixedDeltaTime).magnitude;
         float min = 1000.0f;
-        if (magnitude > min ) {
+        if (magnitude > min)
+        {
             float range = 4000.0f;
-            _klunk.volume = Mathf.Clamp((magnitude - min)/range, 0.1f, 0.8f);
+            _klunk.volume = Mathf.Clamp((magnitude - min) / range, 0.1f, 0.8f);
             _klunk.Play();
-            Debug.Log("Car Collision, magnitude :: "+magnitude);
+            Debug.Log("Car Collision, magnitude :: " + magnitude);
         }
     }
 
@@ -100,29 +102,31 @@ public class SimpleCarController : MonoBehaviour
         if (_driver != null)
         {
             float carSpeed = GetComponent<Rigidbody>().velocity.magnitude;
-            // 1 m/s = 3.6 km/h. 1km/h = 0,621371 Mph
+            // 1 m/s = 3.6 km/h. 1km/h = 0.621371 Mph
             float KMpH = 3.6f * carSpeed;
             _mph = KMpH * 0.621371f;
             // Debug.Log("Car MPH ==> " + Mathf.Round(_mph * 10) / 10);
 
             // Engine sound
-            float speedPct = ( Mathf.Abs(_mph) / _maxMph );
+            float speedPct = (Mathf.Abs(_mph) / _maxMph);
             int numGears = 4;
             float pctPerGear = 1f / numGears;
             float gear = Mathf.Clamp(Mathf.Ceil(speedPct / pctPerGear), 1, 4);
             float gearPct = (speedPct - (gear - 1) * pctPerGear) / pctPerGear;
-            float vol = _minEngineVol + (_maxEngineVol-_minEngineVol) * speedPct;
+            float vol = _minEngineVol + (_maxEngineVol - _minEngineVol) * speedPct;
             _engineSound.pitch = 0.2f + (1f * pctPerGear * gear) + 0.6f * gearPct;
             _engineSound.volume = vol;
 
             UpdateSpeedometer();
 
-            if ( Input.GetKey(KeyCode.Space) )
+            if (Input.GetKey(KeyCode.Space))
             {
                 Debug.Log("Brake Engaged");
                 _braking = true;
 
-            } else {
+            }
+            else
+            {
 
                 float rpm = (axleInfos[0].leftWheel.rpm + axleInfos[0].rightWheel.rpm) * 0.5f;
                 rpm = Mathf.Round(rpm * 10) / 10;
@@ -140,21 +144,26 @@ public class SimpleCarController : MonoBehaviour
         {
             float motor = 0;
             _inputZ = Input.GetAxis("Vertical");
-                // Debug.Log("_inputZ :: " + _inputZ);
-            if(_mph < _maxMph) {
+            // Debug.Log("_inputZ :: " + _inputZ);
+            if (_mph < _maxMph)
+            {
                 motor = maxMotorTorque * _inputZ;
             }
-            
+
             float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
 
             if (_braking && _mph > 30f)
             {
-                if(!_brakes.isPlaying) {
+                if (!_brakes.isPlaying)
+                {
                     // start skidding
                     _brakes.Play();
-                } else {
+                }
+                else
+                {
                     // continue skidding
-                    if (_brakes.time > _brakes.clip.length * 0.65 ){
+                    if (_brakes.time > _brakes.clip.length * 0.65)
+                    {
                         _brakes.time = _brakes.clip.length * 0.3f;
                     }
                 }
@@ -163,17 +172,19 @@ public class SimpleCarController : MonoBehaviour
             Renderer renderer = ornament.GetComponent<Renderer>();
             Color speedColor = _braking ? Color.red : _inputZ == 0 ? Color.grey : Color.green;
             renderer.material.SetColor("_Color", speedColor);
-            
+
             foreach (AxleInfo axleInfo in axleInfos)
             {
                 if (axleInfo.steering)
                 {
+                    // Steer
+
                     // if(_braking){
                     //     axleInfo.leftWheel.steerAngle = steering * 1.7f;
                     //     axleInfo.rightWheel.steerAngle = steering * 1.7f;
                     // } else {
-                        axleInfo.leftWheel.steerAngle = steering;
-                        axleInfo.rightWheel.steerAngle = steering;
+                    axleInfo.leftWheel.steerAngle = steering;
+                    axleInfo.rightWheel.steerAngle = steering;
                     // }
                 }
                 if (axleInfo.motor)
@@ -204,12 +215,13 @@ public class SimpleCarController : MonoBehaviour
 
                         axleInfo.leftWheel.motorTorque = motor;
                         axleInfo.rightWheel.motorTorque = motor;
-                        
+
                     }
-                    
+
                 }
+
                 // Align Wheel Mesh with Wheel Collider
-                
+
                 Quaternion quat;
                 Vector3 position;
                 axleInfo.leftWheel.GetWorldPose(out position, out quat);
@@ -217,18 +229,19 @@ public class SimpleCarController : MonoBehaviour
                 quat = Quaternion.Inverse(transform.rotation) * quat;
                 // axleInfo.leftWheelGO.transform.position = position;
                 axleInfo.leftWheelGO.transform.localRotation = quat;
-                
+
                 axleInfo.rightWheel.GetWorldPose(out position, out quat);
                 quat = Quaternion.Inverse(transform.rotation) * quat;
                 // axleInfo.rightWheelGO.transform.position = position;
                 axleInfo.rightWheelGO.transform.localRotation = quat;
-                
-                
+
+
             }
         }
     }
 
-    void Go(){
+    void Go()
+    {
 
     }
 
@@ -295,7 +308,8 @@ public class SimpleCarController : MonoBehaviour
         _driver = null;
         _PMScript = null;
         // _engineSound.Stop();
-        foreach (AxleInfo axleInfo in axleInfos){
+        foreach (AxleInfo axleInfo in axleInfos)
+        {
             if (axleInfo.motor)
             {
                 axleInfo.leftWheel.brakeTorque = axleInfo.rightWheel.brakeTorque = brakeTorque;
@@ -303,7 +317,7 @@ public class SimpleCarController : MonoBehaviour
                 axleInfo.rightWheel.motorTorque = 0;
             }
         }
-                        
+
     }
 }
 
